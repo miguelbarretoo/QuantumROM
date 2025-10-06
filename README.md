@@ -13,6 +13,7 @@ Tools to bypass or remove security restrictions for enhanced customization.
 **ROM Debloat:**
 Remove unwanted pre-installed apps and optimize device performance.
 
+![QuantumROM Logo](QuantumROM/logo/linux.jpeg)
 # Usage: #
 **First-time setup – install required packages:**
 ```bash
