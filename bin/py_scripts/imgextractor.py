@@ -689,7 +689,7 @@ class Extractor(object):
             if moto:
                 print(".....Finding MOTO structure! Fixing.....")
                 self.fixmoto(os.path.abspath(self.OUTPUT_IMAGE_FILE))
-            print(".....Extraction from %s to %s" % (os.path.basename(target), os.path.basename(self.EXTRACT_DIR)))
+            print(".....Extracting from %s to %s" % (os.path.basename(target), os.path.basename(self.EXTRACT_DIR)))
             self.__ext4extractor()
             print(".....Done! All extraction in %s" % (os.path.basename(self.EXTRACT_DIR)))
 
