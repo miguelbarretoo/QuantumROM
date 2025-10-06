@@ -21,34 +21,43 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Checkout repository.
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Display captured inputs (for debugging)
-      run: |
-        echo "DEVICE_MODEL: ${{ github.event.inputs.DEVICE_MODEL }}"
-        echo "CSC: ${{ github.event.inputs.CSC }}"
-        echo "IMEI: ${{ github.event.inputs.IMEI }}"
+      - name: Display captured inputs (for debugging)
+        run: |
+          echo "DEVICE_MODEL: ${{ github.event.inputs.DEVICE_MODEL }}"
+          echo "CSC: ${{ github.event.inputs.CSC }}"
+          echo "IMEI: ${{ github.event.inputs.IMEI }}"
         
-    - name: Installing required packages.
-      run: |
-        chmod +x ./scripts/install_packages.sh
-        sudo bash ./scripts/install_packages.sh
+      - name: Installing required packages
+        run: |
+          chmod +x ./scripts/install_packages.sh
+          sudo bash ./scripts/install_packages.sh
 
-    - name: Downloading ${{ github.event.inputs.DEVICE_MODEL }} firmware.
-      run: |
-        chmod +x ./scripts/download_firmware.sh
-        sudo bash ./scripts/download_firmware.sh ${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }} ${{ github.event.inputs.CSC }} ${{ github.event.inputs.IMEI }} fw_download ${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }} 
+      - name: Downloading firmware for ${{ github.event.inputs.DEVICE_MODEL }}
+        run: |
+          chmod +x ./scripts/download_firmware.sh
+          sudo bash ./scripts/download_firmware.sh \
+            "${{ github.event.inputs.DEVICE_MODEL }}" \
+            "${{ github.event.inputs.CSC }}" \
+            "${{ github.event.inputs.IMEI }}" \
+            "fw_download" \
+            "${{ github.event.inputs.DEVICE_MODEL }}"
 
-    - name: Extracting ${{ github.event.inputs.DEVICE_MODEL }} firmware.
-      run: |
-        chmod +x ./scripts/extract_firmware.sh
-        sudo bash ./scripts/extract_firmware.sh fw_download/${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }} ${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL.zip
+      - name: Extracting firmware for ${{ github.event.inputs.DEVICE_MODEL }}
+        run: |
+          chmod +x ./scripts/extract_firmware.sh
+          sudo bash ./scripts/extract_firmware.sh \
+            "fw_download/${{ github.event.inputs.DEVICE_MODEL }}" \
+            "${{ github.event.inputs.DEVICE_MODEL }}.zip"
 
-    - name: Run IMG Pack cmd
-      run: |
-        pwd
-        chmod +x ./bin/make_ext4fs
-        chmod +x ./scripts/pack_ext4.sh
-        sudo bash ./scripts/pack_ext4.sh "fw_download/${{ GITHUB.EVENT.INPUTS.DEVICE_MODEL }}" bin out
-
+      - name: Run IMG Pack cmd
+        run: |
+          pwd
+          chmod +x ./bin/make_ext4fs
+          chmod +x ./scripts/pack_ext4.sh
+          sudo bash ./scripts/pack_ext4.sh \
+            "$(pwd)/fw_download/${{ github.event.inputs.DEVICE_MODEL }}" \
+            "$(pwd)/bin" \
+            "$(pwd)/out"
