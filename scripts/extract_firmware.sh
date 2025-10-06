@@ -39,7 +39,7 @@ find "${FW_FILE_DIR}" -type f \
     ! -name 'boot.img.lz4' \
     -delete
 
-echo "Decompressing .lz4 images..."
+echo "Decompressing .lz4 files..."
 for file in "${FW_FILE_DIR}"/*.lz4; do
     [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}"
 done
