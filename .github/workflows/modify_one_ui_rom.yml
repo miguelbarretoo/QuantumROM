@@ -28,11 +28,27 @@ jobs:
         run: |
           chmod +x ./scripts/install_packages.sh
           sudo bash ./scripts/install_packages.sh
-          
+
       - name: Start ROM download and modify process
         run: |
           chmod +x ./mod_rom_1.sh
           sudo bash ./mod_rom_1.sh "${{ github.event.inputs.DEVICE_MODEL }}" "${{ github.event.inputs.CSC }}" "${{ github.event.inputs.IMEI }}"
+
+      - name: Split files before uploading if need
+        run: |
+          GIT_SUPPORT_SIZE=214700000
+          OUT_DIR="./out"
+          echo "--- Checking for large files in $OUT_DIR ---"
+
+          for file in "$OUT_DIR"/*; do
+            [ -f "$file" ] || continue
+            FILE_SIZE=$(stat -c%s "$file")
+            if [ "$FILE_SIZE" -gt "$GIT_SUPPORT_SIZE" ]; then
+              echo "📦 Splitting: $file (Size: $FILE_SIZE bytes)"
+              split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "$file.part"
+              rm -f "$file"
+            fi
+          done
 
       - name: Upload all files to GitHub Release
         uses: softprops/action-gh-release@v2
@@ -43,9 +59,7 @@ jobs:
             ***Build Information***
             - Device Model: ${{ github.event.inputs.DEVICE_MODEL }}
             - CSC: ${{ github.event.inputs.CSC }}
-          files: |
-           ./out/*
-
+          files: ./out/*
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
 
