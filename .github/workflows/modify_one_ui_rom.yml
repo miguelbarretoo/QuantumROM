@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Free disk space
         run: |
@@ -40,7 +40,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '11'
-          cache: 'maven'
+          cache: 'gradle'
 
       - name: Start ROM download and modify process
         run: |
