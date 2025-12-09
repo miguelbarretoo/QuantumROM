@@ -43,7 +43,12 @@ jobs:
         run: |
           chmod +x ./scripts/setup_directories.sh
           sudo bash ./scripts/setup_directories.sh fw_download work out
-          
+
+      - name: Starting target device firmware download.
+        run: |
+          chmod +x ./scripts/download_firmware.sh
+          sudo bash ./scripts/download_firmware.sh "${{ github.event.inputs.TARGET_DEVICE_MODEL }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "fw_download" "${{ github.event.inputs.TARGET_DEVICE_MODEL }}"
+
       - name: Starting stock firmware download.
         run: |
           chmod +x ./QuantumROM/Devices/${{ github.event.inputs.STOCK_DEVICE_MODEL }}/${{ github.event.inputs.STOCK_DEVICE_MODEL }}.sh
