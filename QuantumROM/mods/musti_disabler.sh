@@ -1,6 +1,4 @@
 #!/bin/bash
-set -e
-
 #
 # A simple Samsung services disabler by Ian Macdonald.
 #
@@ -71,5 +69,5 @@ echo " "
 
 disable_fbe
 disable_fde
+
 echo " "
-echo "Multi-disabler"
