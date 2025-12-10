@@ -23,8 +23,8 @@ for folder_path in "$ROM_DIR"/*; do
     fi
 
     partition_name="$folder_name"
-    file_contexts_file="$ROM_DIR/config/$folder_name/${folder_name}_file_contexts"
-    fs_config_file="$ROM_DIR/config/$folder_name/${folder_name}_fs_config"
+    file_contexts_file="$ROM_DIR/config/${folder_name}_file_contexts"
+    fs_config_file="$ROM_DIR/config/${folder_name}_fs_config"
     SIZE=$(du -sb "$ROM_DIR/$folder_name" | awk '{printf "%d", $1 * 1.07}')
 
     if [ "$folder_name" = "system" ]; then
