@@ -137,12 +137,12 @@ class Extractor(object):
         # No need those files
         # pack_sh = config_dir  + self.FileName + "_pack.sh"
         # pack_sparse_sh = config_dir  + self.FileName + "_pack_sparse.sh"
-        # size = config_dir  + self.FileName + "_size.txt"
+        size = config_dir  + self.FileName + "_size.txt"
         # name = config_dir  + self.FileName + "_name.txt"
         # spaces_file = config_dir  + self.FileName + "_space.txt"
         # self.__appendf('make_ext4fs -J -T -1 -S ./file_contexts -C ./fs_config -l ' +str(os.path.getsize(self.OUTPUT_IMAGE_FILE))+ ' -a /'+self.FileName+' "$outdir"/'+self.FileName+'.new.img '+self.FileName+'', pack_sh)
         # self.__appendf('make_ext4fs -s -J -T -1 -S ./file_contexts -C ./fs_config -l ' +str(os.path.getsize(self.OUTPUT_IMAGE_FILE))+ ' -a /'+self.FileName+' "$outdir"/'+self.FileName+'.new.img '+self.FileName+'', pack_sparse_sh)
-        # self.__appendf(os.path.getsize(self.OUTPUT_IMAGE_FILE), size)
+        self.__appendf(os.path.getsize(self.OUTPUT_IMAGE_FILE), size)
         # self.__appendf(os.path.basename(self.OUTPUT_IMAGE_FILE).rsplit('.',1)[0], name)
         #<--2021/04/25
         #fs_config_file = self.FileName + '_fs_config'
