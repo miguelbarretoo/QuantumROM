@@ -12,8 +12,7 @@ fi
 FW_FILE_DIR="$1"
 FW_FILE_NAME="$2"
 
-echo ""
-echo "Extracting firmware ${FW_FILE_NAME}..."
+# Extracting firmware.
 7z x "${FW_FILE_DIR}/${FW_FILE_NAME}" -o"${FW_FILE_DIR}" > /dev/null
 
 # Cleaning up original archive and text files
