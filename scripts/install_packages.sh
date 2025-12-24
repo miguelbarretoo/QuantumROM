@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Linux setup.
-sudo apt update -y
+sudo apt update
 sudo apt install -y p7zip-full lz4 android-sdk-libsparse-utils wget util-linux python3 python3-pip
 
 # Installing Python packages.
