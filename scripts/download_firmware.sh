@@ -58,10 +58,10 @@ fi
 
 # --- Show Firmware Info ---
 file_size=$(du -m "${FW_DIR}/${F_FOLDER}/${MODEL}.zip" | cut -f1)
+echo ""
 echo "✅ Firmware decrypted successfully!"
 echo "Firmware Size: ${file_size} MB"
 echo "Saved to: ${FW_DIR}/${F_FOLDER}/${MODEL}.zip"
-echo ""
 
 # --- Cleanup ---
 rm -f "$enc_file"
