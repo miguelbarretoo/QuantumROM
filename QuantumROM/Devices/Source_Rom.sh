@@ -23,8 +23,7 @@ echo "--- Extracting $MODEL $CSC Firmware ---"
 chmod +x ./scripts/extract_firmware.sh
 bash ./scripts/extract_firmware.sh "$(pwd)/${FW_DIR}/${MODEL}" "${MODEL}.zip"
 
-echo "--- Disabling Security ---"
-chmod +x ./QuantumROM/mods/security_disabler.sh
+echo ""
+echo "--- Disabling $MODEL Security ---"
 chmod +x ./QuantumROM/mods/musti_disabler.sh
-bash ./QuantumROM/mods/security_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
 bash ./QuantumROM/mods/musti_disabler.sh "$(pwd)/${FW_DIR}/${MODEL}"
