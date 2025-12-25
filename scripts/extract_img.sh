@@ -22,12 +22,12 @@ for imgfile in "$ROM_DIR"/*.img; do
 
     case "$fstype" in
         ext4)
-            echo "[$imgfile] Detected ext4"
+            echo "$imgfile Detected ext4"
             python3 ./bin/py_scripts/imgextractor.py "$imgfile" "$ROM_DIR"
             ;;
         erofs)
             echo ""
-            echo "[$imgfile] Detected EROFS. Extraction in ${ROM_DIR}/$(basename "${imgfile%.img}")"
+            echo -e "$imgfile Detected EROFS.\nExtracting in ${ROM_DIR}/$(basename "${imgfile%.img}")"
             ./bin/extract.erofs -i "$imgfile" -x -o "$ROM_DIR"
             ;;
         *)
