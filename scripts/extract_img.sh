@@ -37,5 +37,5 @@ for imgfile in "$ROM_DIR"/*.img; do
     esac
 done
 
-# Remove a original .img
-rm -rf *.img
+# Remove all original .img
+rm -rf "$ROM_DIR"/*.img
