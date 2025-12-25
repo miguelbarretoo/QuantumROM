@@ -49,8 +49,7 @@ if [ -z "$enc_file" ]; then
     exit 1
 fi
 
-# --- Step 5: Decrypting firmware...
-python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" decrypt -v "$version" -i "$enc_file" -o "${FW_DIR}/${F_FOLDER}/${MODEL}.zip"
+python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" decrypt -v "$version" -i "$enc_file" -o "${FW_DIR}/${F_FOLDER}/${MODEL}.zip" >/dev/null 2>&1
 if [ $? -ne 0 ]; then
     echo "❌ Decryption failed."
     exit 1
