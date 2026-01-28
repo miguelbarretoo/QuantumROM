@@ -1,65 +1,67 @@
 #!/bin/bash
-# download_firmware.sh
-# Usage: bash download_firmware.sh MODEL CSC IMEI DOWNLOAD_FOLDER FIRMWARE_FOLDER
 
-if [ "$#" -ne 5 ]; then
-    echo "Usage: bash $0 MODEL CSC IMEI DOWNLOAD_FOLDER FIRMWARE_FOLDER"
-    exit 1
-fi
+download_firmware() {
+    if [ "$#" -ne 4 ]; then
+        echo "Usage: download_firmware MODEL CSC IMEI DOWNLOAD_DIRECTORY"
+        return 1
+    fi
 
-MODEL=$1
-CSC=$2
-IMEI=$3
-FW_DIR=$4
-F_FOLDER=$5
+    local MODEL=$1
+    local CSC=$2
+    local IMEI=$3
+    local DOWN_DIR="${4}/$MODEL"
 
-rm -rf "${FW_DIR}${F_FOLDER}"
-mkdir -p "${FW_DIR}/${F_FOLDER}"
+    mkdir -p "$DOWN_DIR"
 
-echo "======================================"
-echo " Samsung FW Downloader "
-echo "======================================"
-echo "MODEL: $MODEL | CSC: $CSC"
-echo "Fetching latest firmware..."
-echo
+    echo "======================================"
+    echo " Samsung FW Downloader "
+    echo "======================================"
+    echo "MODEL: $MODEL | CSC: $CSC"
+    echo "Fetching latest firmware..."
+    echo
 
-# --- Step 1: Check Update ---
-version=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
-if [ $? -ne 0 ] || [ -z "$version" ]; then
-    echo "❌ MODEL/CSC/IMEI not valid or no update found."
-    echo "Error: $version"
-    exit 1
-else
-    echo "✅ Update found: $version"
-fi
+    # --- Step 1: Check Update ---
+    version=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
+    if [ $? -ne 0 ] || [ -z "$version" ]; then
+        echo "❌ MODEL/CSC/IMEI not valid or no update found."
+        echo "Error: $version"
+        return 1
+    else
+        echo "✅ Update found: $version"
+    fi
 
-# --- Step 3: Download Firmware ---
-python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" download -v "$version" -O "${FW_DIR}/${F_FOLDER}"
-if [ $? -ne 0 ]; then
-    echo "❌ Download failed. Check IMEI/MODEL/CSC."
-    exit 1
-fi
+    # --- Step 2: Download Firmware ---
+    python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" download -v "$version" -O "$DOWN_DIR"
+    if [ $? -ne 0 ]; then
+        echo "❌ Download failed. Check IMEI/MODEL/CSC."
+        return 1
+    fi
 
-# --- Step 4: Decrypt Firmware ---
-enc_file=$(find "${FW_DIR}/${F_FOLDER}" -name "*.enc*" | head -n 1)
+    # --- Step 3: Decrypt Firmware ---
+    enc_file=$(find "$DOWN_DIR" -name "*.enc*" | head -n 1)
 
-if [ -z "$enc_file" ]; then
-    echo "❌ No encrypted firmware file found!"
-    exit 1
-fi
+    if [ -z "$enc_file" ]; then
+        echo "❌ No encrypted firmware file found!"
+        return 1
+    fi
 
-python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" decrypt -v "$version" -i "$enc_file" -o "${FW_DIR}/${F_FOLDER}/${MODEL}.zip" >/dev/null 2>&1
-if [ $? -ne 0 ]; then
-    echo "❌ Decryption failed."
-    exit 1
-fi
+    python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" decrypt \
+        -v "$version" \
+        -i "$enc_file" \
+        -o "${DOWN_DIR}/${MODEL}.zip" >/dev/null 2>&1
 
-# --- Show Firmware Info ---
-file_size=$(du -m "${FW_DIR}/${F_FOLDER}/${MODEL}.zip" | cut -f1)
-echo ""
-echo "✅ Firmware decrypted successfully!"
-echo "Firmware Size: ${file_size} MB"
-echo "Saved to: ${FW_DIR}/${F_FOLDER}/${MODEL}.zip"
+    if [ $? -ne 0 ]; then
+        echo "❌ Decryption failed."
+        return 1
+    fi
 
-# --- Cleanup ---
-rm -f "$enc_file"
+    # --- Show Firmware Info ---
+    file_size=$(du -m "${DOWN_DIR}/${MODEL}.zip" | cut -f1)
+    echo
+    echo "✅ Firmware decrypted successfully!"
+    echo "Firmware Size: ${file_size} MB"
+    echo "Saved to: ${DOWN_DIR}/${MODEL}.zip"
+
+    # --- Cleanup ---
+    rm -f "$enc_file"
+}
