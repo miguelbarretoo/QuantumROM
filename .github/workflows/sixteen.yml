@@ -30,10 +30,10 @@ jobs:
 
       - name: Set Device info.
         run: |
-          export STOCK_DEVICE="${{ github.event.inputs.STOCK_DEVICE }}"
-          export TARGET_DEVICE="${{ github.event.inputs.TARGET_DEVICE }}"
-          export TARGET_DEVICE_CSC="${{ github.event.inputs.TARGET_DEVICE_CSC }}"
-          export TARGET_DEVICE_IMEI="${{ github.event.inputs.TARGET_DEVICE_IMEI }}"
+          echo "STOCK_DEVICE=${{ github.event.inputs.STOCK_DEVICE }}" >> $GITHUB_ENV
+          echo "TARGET_DEVICE=${{ github.event.inputs.TARGET_DEVICE }}" >> $GITHUB_ENV
+          echo "TARGET_DEVICE_CSC=${{ github.event.inputs.TARGET_DEVICE_CSC }}" >> $GITHUB_ENV
+          echo "TARGET_DEVICE_IMEI=${{ github.event.inputs.TARGET_DEVICE_IMEI }}" >> $GITHUB_ENV
 
       - name: Installing required packages.
         run: |
