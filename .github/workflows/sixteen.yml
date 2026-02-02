@@ -18,7 +18,7 @@ on:
       TARGET_DEVICE_IMEI:
         description: "Enter the TARGET_DEVICE_IMEI number."
         required: true
-        default: "357181567907875"
+        default: "353370804197739"
 
 jobs:
   build:
