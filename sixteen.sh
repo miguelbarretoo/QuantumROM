@@ -1,5 +1,10 @@
 #!/bin/bash
 
+export STOCK_DEVICE=$1
+export TARGET_DEVICE=$2
+export TARGET_DEVICE_CSC=$3
+export TARGET_DEVICE_IMEI=$4
+
 # Directories
 export DEVICES_DIR="$(pwd)/QuantumROM/Devices"
 export OUT_DIR="$(pwd)/OUT"
@@ -16,11 +21,6 @@ chmod 755 "$(pwd)/bin"/{erofs-utils,lp,simg2img,ext4}/*
 # Source
 source "$(pwd)/scripts/QuantumRom.sh"
 source "$DEVICES_DIR/$STOCK_DEVICE/config"
-
-echo $STOCK_DEVICE
-echo $TARGET_DEVICE
-echo $TARGET_DEVICE_CSC
-echo $TARGET_DEVICE_IMEI
 
 DOWNLOAD_FIRMWARE "TARGET_DEVICE" "$TARGET_DEVICE_CSC" "TARGET_DEVICE_IMEI" "$FIRM_DIR"
 
