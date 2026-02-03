@@ -7,7 +7,6 @@ chmod +x "$(pwd)/bin/ext4/make_ext4fs"
 chmod +x "$(pwd)/bin/erofs-utils/extract.erofs"
 chmod +x "$(pwd)/bin/erofs-utils/mkfs.erofs"
 
-
 # Device info
 export STOCK_DEVICE=$1
 export TARGET_DEVICE=$2
