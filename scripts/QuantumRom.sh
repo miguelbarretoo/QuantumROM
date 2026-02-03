@@ -122,17 +122,12 @@ EXTRACT_FIRMWARE() {
         fi
     done
 
-    df -h . | awk 'NR==2 {print $4}'
-	
     echo "- Extracting lz4 file."
 	echo " - File in $FIRM_DIR"
-    find "$FIRM_DIR"
-	for file in "${FW_FILE_DIR}"/*.lz4; do
+	for file in "${FIRM_DIR}"/*.lz4; do
         [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}"
     done
     rm -rf "${FIRM_DIR}"/*.lz4
-
-	echo " - File in $FIRM_DIR"
 
     # ---- REMOVE UNWANTED FILES ----
     rm -rf \
