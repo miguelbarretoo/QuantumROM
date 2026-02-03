@@ -1,6 +1,6 @@
 #!/bin/bash
 
-REAL_USER=${SUDO_USER:-$USER}
+# REAL_USER=${SUDO_USER:-$USER}
 
 CHECK_FILE() {
     if [ ! -f "$1" ]; then
@@ -128,10 +128,14 @@ EXTRACT_FIRMWARE() {
     # ---- SUPER.IMG handling ----
     if [ -f "$FIRM_DIR/super.img" ]; then
         if file "$FIRM_DIR/super.img" | grep -qi "sparse"; then
+		    echo "- Converting super.img to super_raw.img."
             simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
             rm -rf "$FIRM_DIR/super.img"
+			echo "- Extracting partition from super.img"
             lpunpack "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
+			rm -rf "$FIRM_DIR/super_raw.img"
         else
+			echo "- Extracting partition from super.img"
             lpunpack "$FIRM_DIR/super.img" "$FIRM_DIR"
 			rm -rf "$FIRM_DIR/super.img"
         fi
@@ -186,11 +190,11 @@ EXTRACT_FIRMWARE_IMG() {
         esac
     done
 
-    sudo chown -R "$REAL_USER:$REAL_USER" "$FIRM_DIR/config"
-    chmod -R u+rwX "$FIRM_DIR/config"
-
     # Remove all original .img
     rm -rf "$FIRM_DIR"/*.img
+
+    # sudo chown -R "$REAL_USER:$REAL_USER" "$FIRM_DIR/config"
+    # chmod -R u+rwX "$FIRM_DIR/config"
 }
 
 
@@ -677,37 +681,42 @@ PREPARE_PARTITIONS() {
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
-    local PARTS=("${BUILD_PARTITIONS[@]}")
-    local dir keep name
 
-    shopt -s nullglob
+    [[ -z "$EXTRACTED_FIRM_DIR" || ! -d "$EXTRACTED_FIRM_DIR" ]] && {
+        echo "Invalid directory: $EXTRACTED_FIRM_DIR"
+        return 1
+    }
 
-    if [[ -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
-        PARTS+=("system_ext")
-    fi
+    IFS=',' read -r -a KEEP <<< "$BUILD_PARTITIONS"
 
-    for dir in "$EXTRACTED_FIRM_DIR"/*; do
-        [[ ! -d "$dir" ]] && continue
+    for i in "${!KEEP[@]}"; do
+        KEEP[$i]=$(echo "${KEEP[$i]}" | xargs)
+    done
 
-        name="$(basename "$dir")"
+    echo ""
+    echo "Preparing: $EXTRACTED_FIRM_DIR"
 
-        # Always keep config
-        if [[ "$name" == "config" ]]; then
-            continue
-        fi
+    shopt -s nullglob dotglob
 
-        keep=0
-        for p in "${PARTS[@]}"; do
-            [[ "$p" == "$name" ]] && keep=1 && break
+    for item in "$EXTRACTED_FIRM_DIR"/*; do
+        base=$(basename "$item")
+
+        [[ "$base" == *.img ]] && base="${base%.img}"
+
+        keep_this=0
+        for k in "${KEEP[@]}"; do
+            [[ "$k" == "$base" ]] && keep_this=1 && break
         done
 
-        if [[ $keep -eq 0 ]]; then
-            echo "Deleting $dir"
-            rm -rf -- "$dir"
+        if [[ $keep_this -eq 0 ]]; then
+            echo "- Deleting: $item"
+            rm -rf -- "$item"
+        else
+            echo "- Keeping: $item"
         fi
     done
 
-    shopt -u nullglob
+    shopt -u nullglob dotglob
 }
 
 
