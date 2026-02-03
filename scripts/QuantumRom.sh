@@ -154,10 +154,6 @@ EXTRACT_FIRMWARE_IMG() {
 	local FIRM_DIR="$1"
 
 	echo ""
-	echo "Extracting img from $FIRM_DIR"
-	blkid -o value -s TYPE $FIRM_DIR/product.img
-    blkid -o value -s TYPE $FIRM_DIR/system_ext.img
-    blkid -o value -s TYPE $FIRM_DIR/system.img
     for imgfile in "$FIRM_DIR"/*.img; do
         [ -e "$imgfile" ] || continue
 
@@ -720,6 +716,7 @@ PREPARE_PARTITIONS() {
     done
 
     shopt -u nullglob dotglob
+	ls $EXTRACTED_FIRM_DIR/
 }
 
 
