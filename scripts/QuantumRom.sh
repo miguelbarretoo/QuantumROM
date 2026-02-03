@@ -122,6 +122,9 @@ EXTRACT_FIRMWARE() {
         [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}"
     done
     rm -rf "${FIRM_DIR}"/*.lz4
+    
+	echo " - File in $FIRM_DIR"
+    find "$FIRM_DIR"
 
     # ---- REMOVE UNWANTED FILES ----
     rm -rf \
@@ -129,6 +132,9 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/*.pit \
         "$FIRM_DIR"/*.bin \
         "$FIRM_DIR"/meta-data
+
+	echo " - File in $FIRM_DIR"
+    find "$FIRM_DIR"
 
     # ---- SUPER.IMG handling ----
     echo "- Converting super.img to super_raw.img."
