@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Linux setup.
-# sudo apt update
+sudo apt update
 sudo apt install -y p7zip-full lz4 android-sdk-libsparse-utils liblp python3 python3-pip
 
 # Installing Python packages.
@@ -15,3 +15,6 @@ sudo apt clean
 rm -rf ~/.cache/*
 sudo apt autoclean
 sudo apt autoremove -y
+
+simg2img
+lpunpack
