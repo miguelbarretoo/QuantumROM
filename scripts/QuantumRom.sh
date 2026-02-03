@@ -94,12 +94,16 @@ EXTRACT_FIRMWARE() {
         return 1
     fi
 
-    # ---- ZIP ----
+    echo "- Extracting zip file."
+	echo " - File in $FIRM_DIR"
+    find "$FIRM_DIR"
     find "$FIRM_DIR" -maxdepth 1 -name "*.zip" \
         -exec 7z x -y -bd -o"$FIRM_DIR" {} \;
     rm -rf "$FIRM_DIR"/*.zip
 
-    # ---- XZ ----
+    echo "Extracting xz file."
+	echo " - File in $FIRM_DIR"
+    find "$FIRM_DIR"
     find "$FIRM_DIR" -maxdepth 1 -name "*.xz" \
         -exec 7z x -y -bd -o"$FIRM_DIR" {} \;
     rm -rf "$FIRM_DIR"/*.xz
@@ -108,8 +112,9 @@ EXTRACT_FIRMWARE() {
     find "$FIRM_DIR" -maxdepth 1 -name "*.md5" \
         -exec sh -c 'mv -- "$1" "${1%.md5}"' _ {} \;
 
-    # ---- TAR ----
     echo "Extracting tar files..."
+	echo " - File in $FIRM_DIR"
+    find "$FIRM_DIR"
     for file in "${FIRM_DIR}"/*.tar; do
         if [ -f "$file" ]; then
             tar -xvf "$file" -C "${FIRM_DIR}"
@@ -117,7 +122,11 @@ EXTRACT_FIRMWARE() {
         fi
     done
 
-    # ---- LZ4 ----
+    df -h . | awk 'NR==2 {print $4}'
+	
+    echo "- Extracting lz4 file."
+	echo " - File in $FIRM_DIR"
+    find "$FIRM_DIR"
 	for file in "${FW_FILE_DIR}"/*.lz4; do
         [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}"
     done
@@ -133,6 +142,7 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/meta-data
 	
     # ---- SUPER.IMG handling ----
+
     if [ -f "$FIRM_DIR/super.img" ]; then
         if file "$FIRM_DIR/super.img" | grep -qi "sparse"; then
 		    echo "- Converting super.img to super_raw.img."
