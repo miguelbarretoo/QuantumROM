@@ -985,7 +985,7 @@ APPLY_STOCK_CONFIG() {
 	# Replace Stock Files.
 	find "$EXTRACTED_FIRM_DIR/system/system/media" -maxdepth 1 -type f \( -iname "*.spi" -o -iname "*.qmg" -o -iname "*.txt" \) -delete
 	rm -rf $EXTRACTED_FIRM_DIR/product/overlay/framework-res*auto_generated_rro_product.apk
-	cp -rf "$DEVICES_DIR/$STOCK_DEVICE/Stock"/* "$EXTRACTED_FIRM_DIR/"
+	cp -a "$DEVICES_DIR/$STOCK_DEVICE/Stock/." "$EXTRACTED_FIRM_DIR/"
 }
 
 
@@ -1095,6 +1095,16 @@ APPLY_FEATURES() {
     BUILD_PROP "$EXTRACTED_FIRM_DIR" "ro.surface_flinger.protected_contents" "true"
 
 	echo " China smart manager."
+	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/AppLock"
+    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/Firewall"
+    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManager_v5"
+    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManagerCN"
+	cp -a "$(pwd)/QuantumROM/Mods/SMART_MANAGER_CN/." "$EXTRACTED_FIRM_DIR/"
+
+	echo " Full oneui and important apps."
+	rm -rf "$EXTRACTED_FIRM_DIR/system/system/app/ClockPackage"
+	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_*"
+	cp -a "$(pwd)/QuantumROM/Mods/Apps/." "$EXTRACTED_FIRM_DIR/"
 }
 
 
