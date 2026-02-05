@@ -653,7 +653,7 @@ PATCH_BT_LIB() {
             echo "- Found Bluetooth patch pattern [$idx]"
             HEX_PATCH "$BT_LIB_FILE" "$from" "$to" || return 1
             PATCHED=1
-			cp -fv "$WORK_DIR/libbluetooth_jni.so" "$EXTRACTED_FIRM_DIR/system/system/lib64/"
+			cp -rfa "$WORK_DIR/libbluetooth_jni.so" "$EXTRACTED_FIRM_DIR/system/system/lib64/"
             break
         fi
     done
@@ -743,7 +743,7 @@ FIX_VNDK() {
     else
         echo "- VNDK mismatch or missing."
         rm -f "$APEX_DIR"/com.android.vndk*.apex
-        cp -f "$VNDKS_COLLECTION/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" "$APEX_DIR/"
+        cp -rfa "$VNDKS_COLLECTION/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" "$APEX_DIR/"
         sed -i "/<vendor-ndk>/,/<\/vendor-ndk>/ s|<version>[0-9]\+</version>|<version>${STOCK_VNDK_VERSION}</version>|" "$EXTRACTED_FIRM_DIR/system/system_ext/etc/vintf/manifest.xml"
     fi
 }
@@ -1099,12 +1099,12 @@ APPLY_FEATURES() {
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/Firewall"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManager_v5"
     rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SmartManagerCN"
-	cp -a "$(pwd)/QuantumROM/Mods/SMART_MANAGER_CN/." "$EXTRACTED_FIRM_DIR/"
+	cp -rfa "$(pwd)/QuantumROM/Mods/SMART_MANAGER_CN/." "$EXTRACTED_FIRM_DIR/"
 
 	echo " Full oneui and important apps."
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/app/ClockPackage"
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_*"
-	cp -a "$(pwd)/QuantumROM/Mods/Apps/." "$EXTRACTED_FIRM_DIR/"
+	cp -rfa "$(pwd)/QuantumROM/Mods/Apps/." "$EXTRACTED_FIRM_DIR/"
 }
 
 
