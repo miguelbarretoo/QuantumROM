@@ -1,13 +1,34 @@
 #!/bin/bash
 
-set -e
+set -Eeuo pipefail
+
+trap '{
+    EXIT_CODE=$?
+    LINE_NO=${BASH_LINENO[0]}
+    CMD=${BASH_COMMAND}
+
+    echo ""
+    echo "❌ Build failed!"
+    echo "➡️ Line     : $LINE_NO"
+    echo "➡️ Command  : $CMD"
+    echo "➡️ Exit code: $EXIT_CODE"
+    echo ""
+
+    exit $EXIT_CODE
+}' ERR
+
+
+if [ "$#" -lt 5 ]; then
+    echo "Usage: $0 <STOCK_DEVICE> <TARGET_DEVICE> <CSC> <IMEI> <OUTPUT_FILESYSTEM>"
+    exit 1
+fi
 
 # Device info
-export STOCK_DEVICE=$1
-export TARGET_DEVICE=$2
-export TARGET_DEVICE_CSC=$3
-export TARGET_DEVICE_IMEI=$4
-export OUTPUT_FILESYSTEM=$5
+export STOCK_DEVICE="$1"
+export TARGET_DEVICE="$2"
+export TARGET_DEVICE_CSC="$3"
+export TARGET_DEVICE_IMEI="$4"
+export OUTPUT_FILESYSTEM="$5"
 
 # Directories
 export OUT_DIR="$(pwd)/OUT"
