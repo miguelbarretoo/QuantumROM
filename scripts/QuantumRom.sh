@@ -560,6 +560,7 @@ PATCH_KNOX_GUARD() {
     throw p0
     '
     REPLACE_SMALI_METHOD "$FILE" "$METHOD_NAME_1" "$REPLACE_BODY_1"
+	rm -rf "$FIRM_DIR/system/system/priv-app/KnoxGuard"
 }
 
 
