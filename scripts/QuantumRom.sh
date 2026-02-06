@@ -663,6 +663,19 @@ PATCH_BT_LIB() {
 }
 
 
+FIX_VNDK() {
+    echo "- Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
+    if [ -f "$TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" ]; then
+        echo "- VNDK matched."
+    else
+        echo "- VNDK mismatch or missing."
+        rm -f "$TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk"*.apex
+        cp -rfa "$VNDKS_COLLECTION/oneui_8.0/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" "$TARGET_ROM_SYSTEM_EXT_DIR/apex/"
+        sed -i "/<vendor-ndk>/,/<\/vendor-ndk>/ s|<version>[0-9]\+</version>|<version>${STOCK_VNDK_VERSION}</version>|" "$TARGET_ROM_SYSTEM_EXT_DIR/etc/vintf/manifest.xml"
+    fi
+}
+
+
 FIX_SYSTEM_EXT() {
     if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
@@ -670,6 +683,10 @@ FIX_SYSTEM_EXT() {
     fi
 
     local EXTRACTED_FIRM_DIR="$1"
+	
+	if [[ ! -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
+        export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
+	fi
 	
     if [[ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" == FALSE && -d "$EXTRACTED_FIRM_DIR/system_ext" ]]; then
 	    echo "Fixing system_ext according to $STOCK_DEVICE"
@@ -720,26 +737,6 @@ FIX_SYSTEM_EXT() {
 	    rm -rf "$EXTRACTED_FIRM_DIR/system_ext"
 		rm -rf "$EXTRACTED_FIRM_DIR/config/system_ext_fs_config"
 		rm -rf "$EXTRACTED_FIRM_DIR/config/system_ext_file_contexts"
-    fi
-}
-
-
-FIX_VNDK() {
-    if [ "$#" -ne 1 ]; then
-        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
-        return 1
-    fi
-
-    local EXTRACTED_FIRM_DIR="$1"
-    local APEX_DIR="$EXTRACTED_FIRM_DIR/system/system_ext/apex"
-    echo "- Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
-    if [ -f "$APEX_DIR/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" ]; then
-        echo "- VNDK matched."
-    else
-        echo "- VNDK mismatch or missing."
-        rm -f "$APEX_DIR"/com.android.vndk*.apex
-        cp -rfa "$VNDKS_COLLECTION/oneui_8.0/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" "$APEX_DIR/"
-        sed -i "/<vendor-ndk>/,/<\/vendor-ndk>/ s|<version>[0-9]\+</version>|<version>${STOCK_VNDK_VERSION}</version>|" "$EXTRACTED_FIRM_DIR/system/system_ext/etc/vintf/manifest.xml"
     fi
 }
 
@@ -968,7 +965,7 @@ APPLY_STOCK_CONFIG() {
     FIX_SYSTEM_EXT "$EXTRACTED_FIRM_DIR"
 
 	# FIX VNDK.
-	FIX_VNDK "$EXTRACTED_FIRM_DIR"
+	FIX_VNDK
 
 	# FIX SELINUX.
 	FIX_SELINUX "$EXTRACTED_FIRM_DIR"
