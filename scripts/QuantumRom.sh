@@ -140,12 +140,14 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/*.bin \
         "$FIRM_DIR"/meta-data
 
-    echo "- Extracting super.img"
-    simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
-    rm -rf "$FIRM_DIR/super.img"
-    lpunpack -o "$FIRM_DIR" "$FIRM_DIR/super_raw.img"
-	rm -rf "$FIRM_DIR/super_raw.img"
-    echo "- Extraction complete"
+    if [ -f "$FIRM_DIR/super.img" ]; then
+        echo "- Extracting super.img"
+        simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
+        rm -f "$FIRM_DIR/super.img"
+        lpunpack -o "$FIRM_DIR" "$FIRM_DIR/super_raw.img"
+        rm -f "$FIRM_DIR/super_raw.img"
+        echo "- Extraction complete"
+    fi
 }
 
 
