@@ -1092,6 +1092,9 @@ APPLY_FEATURES() {
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/app/ClockPackage"
 	rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_*"
 	cp -rfa "$(pwd)/QuantumROM/Mods/Apps/." "$EXTRACTED_FIRM_DIR/"
+	
+	# SDHMS
+	cp -rfa "$(pwd)/QuantumROM/Mods/SDHMS/." "$EXTRACTED_FIRM_DIR/"
 }
 
 
