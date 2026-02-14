@@ -41,19 +41,25 @@ jobs:
           pip3 install liblp tgcrypto pyrogram  >/dev/null 2>&1
           pip3 install git+https://github.com/martinetd/samloader.git  >/dev/null 2>&1
           # Binary
-          chmod +x "$(pwd)/bin/ext4/make_ext4fs"
-          chmod +x "$(pwd)/bin/erofs-utils/extract.erofs"
-          chmod +x "$(pwd)/bin/erofs-utils/mkfs.erofs"
+          chmod +x "bin/ext4/make_ext4fs"
+          chmod +x "bin/erofs-utils/extract.erofs"
+          chmod +x "bin/erofs-utils/mkfs.erofs"
 
-      - name: Setup directories.
+      - name: Setup.
         run: |
-          chmod +x ./scripts/setup_directories.sh
-          bash ./scripts/setup_directories.sh FIRMWARE WORK OUT
+          chmod +x sixteen.sh
+          chmod +x scripts/setup_directories.sh
+          bash scripts/setup_directories.sh FIRMWARE WORK OUT
+
+      - name: Download firmware
+        shell: bash
+        run: |
+          source scripts/QuantumRom.sh
+          DOWNLOAD_FIRMWARE "${{ github.event.inputs.TARGET_DEVICE }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "=${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "FIRMWARE"
 
       - name: Make Rom.
         run: |
-          chmod +x ./sixteen.sh
-          bash ./sixteen.sh ${{ github.event.inputs.STOCK_DEVICE }} ${{ github.event.inputs.TARGET_DEVICE }} ${{ github.event.inputs.TARGET_DEVICE_CSC }} ${{ github.event.inputs.TARGET_DEVICE_IMEI }} ${{ github.event.inputs.OUTPUT_FILESYSTEM }}
+          bash sixteen.sh ${{ github.event.inputs.STOCK_DEVICE }} ${{ github.event.inputs.TARGET_DEVICE }} ${{ github.event.inputs.TARGET_DEVICE_CSC }} ${{ github.event.inputs.TARGET_DEVICE_IMEI }} ${{ github.event.inputs.OUTPUT_FILESYSTEM }}
 
       - name: Splitting files before uploading if need.
         run: |
