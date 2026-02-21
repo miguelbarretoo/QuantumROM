@@ -1028,7 +1028,7 @@ APPLY_STOCK_CONFIG() {
 	# FIX SELINUX.
 	FIX_SELINUX
 
-    # STOCK STOCK FLOATING FEATURES
+    # Apply stock floating feature.
 	APPLY_STOCK_FLOATING_FEATURE
 
     # Fix unsupported BPF error for kernels lower than 5.10.
@@ -1182,8 +1182,11 @@ APPLY_CUSTOM_FEATURES() {
         cp -rfa "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/"* "$EXTRACTED_FIRM_DIR"
     fi
 
-    # STOCK CUSTOM FLOATING FEATURES
+    # Apply custom floating feature.
 	APPLY_CUSTOM_FLOATING_FEATURE
+
+    # Fix Samsung AI Photo Editor Crash.
+	sed -i '0,/"ModelType": "MODEL_TYPE_INSTANCE_CAPTURE"/s//"ModelType": "MODEL_TYPE_OBJ_INSTANCE_CAPTURE"/' "$EXTRACTED_FIRM_DIR/system/system/cameradata/portrait_data/single_bokeh_feature.json"
 
 	# Remove power and data usage permissions for certain apps when Power Saver and Data Saver are always enabled.
 	# sed -i '/^[[:space:]]*<allow-in-power-save/d; /^[[:space:]]*<allow-in-data-usage-save/d' "$EXTRACTED_FIRM_DIR/product/etc/sysconfig/"*.xml "$EXTRACTED_FIRM_DIR/system/system/etc/sysconfig/"*.xml
