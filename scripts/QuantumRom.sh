@@ -257,7 +257,7 @@ EXTRACT_FIRMWARE_IMG() {
 
 	local FIRM_DIR="$1"
 
-    # PREPARE_PARTITIONS "$FIRM_DIR"
+    PREPARE_PARTITIONS "$FIRM_DIR"
 	echo "Extracting imges from $FIRM_DIR"
     for imgfile in "$FIRM_DIR"/*.img; do
         [ -e "$imgfile" ] || continue
