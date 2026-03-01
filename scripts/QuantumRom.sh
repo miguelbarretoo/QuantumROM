@@ -151,7 +151,7 @@ DOWNLOAD_FIRMWARE() {
 
 
 EXTRACT_FIRMWARE() {
-	if [ "$#" -ne 1 ]; then
+    if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <FIRMWARE_DIRECTORY>"
         return 1
     fi
@@ -159,33 +159,50 @@ EXTRACT_FIRMWARE() {
     local FIRM_DIR="$1"
 
     echo "Extracting downloaded firmware."
-    echo "- Extracting zip file."
-    find "$FIRM_DIR" -maxdepth 1 -name "*.zip" \
-        -exec 7z x -y -bd -o"$FIRM_DIR" {} \; >/dev/null 2>&1
-    rm -rf "$FIRM_DIR"/*.zip
 
-    echo "- Extracting xz file."
-    find "$FIRM_DIR" -maxdepth 1 -name "*.xz" \
-        -exec 7z x -y -bd -o"$FIRM_DIR" {} \; >/dev/null 2>&1
-    rm -rf "$FIRM_DIR"/*.xz
-
-    # ---- MD5 rename ----
-    find "$FIRM_DIR" -maxdepth 1 -name "*.md5" \
-        -exec sh -c 'mv -- "$1" "${1%.md5}"' _ {} \;
-
-    echo "- Extracting tar files..."
-    for file in "${FIRM_DIR}"/*.tar; do
+    # ---- ZIP ----
+    for file in "$FIRM_DIR"/*.zip; do
         if [ -f "$file" ]; then
-            tar -xvf "$file" -C "${FIRM_DIR}" >/dev/null 2>&1
+            echo "- Extracting zip: $(basename "$file")"
+            7z x -y -bd -o"$FIRM_DIR" "$file" >/dev/null 2>&1
             rm -f "$file"
         fi
     done
 
-    echo "- Extracting lz4 file."
-	for file in "${FIRM_DIR}"/*.lz4; do
-        [ -f "$file" ] && lz4 -d "$file" "${file%.lz4}" >/dev/null 2>&1
+    # ---- XZ ----
+    for file in "$FIRM_DIR"/*.xz; do
+        if [ -f "$file" ]; then
+            echo "- Extracting xz: $(basename "$file")"
+            7z x -y -bd -o"$FIRM_DIR" "$file" >/dev/null 2>&1
+            rm -f "$file"
+        fi
     done
-    rm -rf "${FIRM_DIR}"/*.lz4
+
+    # ---- MD5 rename ----
+    for file in "$FIRM_DIR"/*.md5; do
+        if [ -f "$file" ]; then
+            mv -- "$file" "${file%.md5}"
+        fi
+    done
+
+    # ---- TAR ----
+    for file in "$FIRM_DIR"/*.tar; do
+        if [ -f "$file" ]; then
+            echo "- Extracting tar: $(basename "$file")"
+            tar -xvf "$file" -C "$FIRM_DIR" >/dev/null 2>&1
+            rm -f "$file"
+        fi
+    done
+
+    # ---- LZ4 ----
+	rm -rf $FIRM_DIR/{boot.img.lz4,cache.img.lz4,dtbo.img.lz4,efuse.img.lz4,gz-verified.img.lz4,lk-verified.img.lz4,md1img.img.lz4,md_udc.img.lz4,misc.bin.lz4,omr.img.lz4,optics.img.lz4,param.bin.lz4,preloader.img.lz4,prism.img.lz4,recovery.img.lz4,scp-verified.img.lz4,spmfw-verified.img.lz4,sspm-verified.img.lz4,tee-verified.img.lz4,tzar.img.lz4,up_param.bin.lz4,userdata.img.lz4,vbmeta.img.lz4,vbmeta_system.img.lz4}
+    for file in "$FIRM_DIR"/*.lz4; do
+        if [ -f "$file" ]; then
+            echo "- Extracting lz4: $(basename "$file")"
+            lz4 -d "$file" "${file%.lz4}" >/dev/null 2>&1
+            rm -f "$file"
+        fi
+    done
 
     # ---- REMOVE UNWANTED FILES ----
     rm -rf \
@@ -194,12 +211,15 @@ EXTRACT_FIRMWARE() {
         "$FIRM_DIR"/*.bin \
         "$FIRM_DIR"/meta-data
 
+    # ---- SUPER.IMG ----
     if [ -f "$FIRM_DIR/super.img" ]; then
         echo "- Extracting super.img"
         simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
         rm -f "$FIRM_DIR/super.img"
-        sudo $(pwd)/bin/lp/lpunpack "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
+
+        sudo "$(pwd)/bin/lp/lpunpack" "$FIRM_DIR/super_raw.img" "$FIRM_DIR"
         rm -f "$FIRM_DIR/super_raw.img"
+
         echo "- Extraction complete"
     fi
 }
@@ -1265,9 +1285,9 @@ APPLY_CUSTOM_FEATURES() {
 		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/shadowremoval"
 		rm -rf "$EXTRACTED_FIRM_DIR/system/system/etc/style_transfer"
 	    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app"/PhotoEditor_*
-        unzip -o "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/system/system/priv-app/PhotoEditor_AIFull.zip" -d "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/system/system/priv-app/" >/dev/null 2>&1
-		rm -f "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/system/system/priv-app/PhotoEditor_AIFull.zip"
         cp -rfa "$(pwd)/QuantumROM/Mods/Apps/PhotoEditor_AIFull/"* "$EXTRACTED_FIRM_DIR"
+		unzip -o "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull.zip" -d "$EXTRACTED_FIRM_DIR/system/system/priv-app/" >/dev/null 2>&1
+		rm -f "$EXTRACTED_FIRM_DIR/system/system/priv-app/PhotoEditor_AIFull.zip"
     fi
 
     # Apply custom floating feature.
