@@ -52,18 +52,18 @@ Give a ⭐ star to the repository.
 Fork the repository to your GitHub account.
 
 #### 2. Run the Workflow:
-- Open your forked repository.
+Open your forked repository.
 - Go to the Actions tab.
 - Select QuantumROM Tools.
 - Click Run workflow.
 
 #### 3. Set Your Device Model:
-- Update your device model in the STOCK_DEVICE_MODEL option.
+Update your device model in the STOCK_DEVICE_MODEL option.
 - If your model is available in /QuantumROM/Device folder of this repository, the tool will work for your device.
 - If your model is not present, set STOCK_DEVICE_MODEL to None.
 
 #### 4. Kernel BPF Version Option:
-- Set this o
+Set this o
 ption to True if your kernel BPF version is 5.4 (lower than 5.10).
 - Otherwise, set it to False.
 
@@ -78,7 +78,7 @@ ption to True if your kernel BPF version is 5.4 (lower than 5.10).
 - Change the IMEI if you want to change the target device.
 
 #### 6. OUTPUT_FILESYSTEM (erofs / ext4):
-- My tool can build images in two formats:
+My tool can build images in two formats:
 - erofs
   - Recommended if your device partition size is small.
   - Saves storage space.
@@ -88,7 +88,7 @@ ption to True if your kernel BPF version is 5.4 (lower than 5.10).
   - The generated image will be larger in size.
 
 #### 7. Compress IMG to XZ (True / False):
-- If set to True:
+If set to True:
 The generated image will be compressed to .xz format.
 - This reduces file size before uploading.
 - If set to False:
