@@ -108,7 +108,7 @@ In your forked repository, go to:
 GitHub does not allow uploading a single file larger than 2GB.
 Therefore, any image file larger than 2GB will be automatically split.
 Example split files:
-- Split files Will Like:
+- Split files will look like:
    - system.img.xz.part000
    - system.img.xz.part001
 - Steps to Recreate the Original File.
