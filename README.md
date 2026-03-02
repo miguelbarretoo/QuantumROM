@@ -4,12 +4,12 @@
 - This Custom ROM is built by combining and refining features from multiple projects, including UNICA, Legacy-UI, and AstroRom.
 - The goal of this ROM is to provide a clean, optimized, and stable One UI experience with enhanced usability and performance.
 
-# Tools features.
+## Tools features.
 - Download firmware directly from samsung server.
 - File config and file contexts generate.
 - Extract and img build ( erofs and ext4 supported).
 
-# ✨ Key Features:
+## ✨ Key Features:
 - System Optimization.
 - Heavy debloated system (removed unnecessary apps & services).
 - Improved performance and smoother UI experience.
@@ -28,18 +28,18 @@
 - [BluetoothLibraryPatcher](https://github.com/3arthur6/BluetoothLibraryPatcher) integrated
 - [KnoxPatch](https://github.com/salvogiangri/KnoxPatch) integrated
 
-# 🔐 Security & Privacy:
+## 🔐 Security & Privacy:
 - Secure Folder support.
 - Essential security components retained.
 - Stable and safe daily-driver experience.
 
-# 📱 One UI Experience:
+## 📱 One UI Experience:
 - Full One UI apps included.
 - Important system apps preserved.
 - China Smart Manager support.
 - AI features enabled.
 
-# 🎯 Project Goal
+## 🎯 Project Goal
 - To deliver a lightweight yet fully featured Samsung One UI ROM that balances.
 - Performance.
 - Stability.
