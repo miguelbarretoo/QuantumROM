@@ -109,8 +109,8 @@ GitHub does not allow uploading a single file larger than 2GB.
 Therefore, any image file larger than 2GB will be automatically split.
 Example split files:
 - Split files Will Like:
-   system.img.xz.part000
-   system.img.xz.part001
+   - system.img.xz.part000
+   - system.img.xz.part001
 - Steps to Recreate the Original File.
 - Download all split files from the Release section.
 - Combine them into a single file.
