@@ -48,8 +48,10 @@
 
 # How to Use:
 #### 1. Fork the Repository
-- Give a ⭐ star to the repository.
-- Fork the repository to your GitHub account.
+```md
+Give a ⭐ star to the repository.
+```md
+Fork the repository to your GitHub account.
 
 #### 2. Run the Workflow:
 - Open your forked repository.
@@ -63,7 +65,8 @@
 - If your model is not present, set STOCK_DEVICE_MODEL to None.
 
 #### 4. Kernel BPF Version Option:
-- Set this option to True if your kernel BPF version is 5.4 (lower than 5.10).
+- Set this o
+ption to True if your kernel BPF version is 5.4 (lower than 5.10).
 - Otherwise, set it to False.
 
 #### 5. Set Target Device Information:
@@ -84,6 +87,7 @@
 - Recommended if your device partition size is small.
 - Saves storage space.
 - Your kernel must support EROFS.
+
 - ext4
 - Use this if your kernel does not support EROFS.
 - The generated image will be larger in size.
@@ -114,7 +118,7 @@ Example split files:
 - On Linux or Termux:
 ```bash
 cat system.img.xz.part* > system.img.xz
-```bash
+```
 
 ## Licensing
 This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
