@@ -348,7 +348,7 @@ DISABLE_FBE() {
 
     for i in $fstab_files; do
         if [ -f "$i" ]; then
-            echo "Disabling file-based encryption (FBE) for /data..."
+            echo "- Disabling file-based encryption (FBE) for /data..."
             echo "- Found $i."
             sed -i -e 's/^\([^#].*\)fileencryption=[^,]*\(.*\)$/# &\n\1encryptable\2/g' "$i"
         fi
@@ -374,7 +374,7 @@ DISABLE_FDE() {
 
     for i in $fstab_files; do
         if [ -f "$i" ]; then
-            echo "Disabling full-disk encryption (FDE) for /data..."
+            echo "- Disabling full-disk encryption (FDE) for /data..."
             echo "- Found $i."
             md5=$(md5 "$i")
             sed -i -e 's/^\([^#].*\)forceencrypt=[^,]*\(.*\)$/# &\n\1encryptable\2/g' "$i"
@@ -1278,8 +1278,10 @@ DISABLE_SECURITY() {
     echo "- Disabling security related things..."
     if [ -f "$EXTRACTED_FIRM_DIR/product/etc/build.prop" ]; then
         REMOVE_LINE "ro.frp.pst=/dev/block/persistent" "$EXTRACTED_FIRM_DIR/product/etc/build.prop"
-    else
-        echo "- build.prop not found in product/etc. Skipping FRP removal."
+    fi
+	
+    if [ -f "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p" ]; then
+        rm -rf "$EXTRACTED_FIRM_DIR/vendor/recovery-from-boot.p"
     fi
 
 	DISABLE_FBE "$EXTRACTED_FIRM_DIR"
