@@ -1266,6 +1266,23 @@ BUILD_PROP() {
 }
 
 
+REMOVE_TLC_ICC() {
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+
+    if [ -d "$EXTRACTED_FIRM_DIR/vendor" ]; then
+        rm -f \
+        "$EXTRACTED_FIRM_DIR/vendor/bin/hw/vendor.samsung.hardware.tlc.iccc@1.0-service" \
+        "$EXTRACTED_FIRM_DIR/vendor/etc/init/vendor.samsung.hardware.tlc.iccc@1.0-service.rc" \
+        "$EXTRACTED_FIRM_DIR/vendor/etc/vintf/manifest/vendor.samsung.hardware.tlc.iccc@1.0-manifest.xml" \
+        "$EXTRACTED_FIRM_DIR/vendor/lib64/vendor.samsung.hardware.tlc.iccc@1.0-impl.so" \
+        "$EXTRACTED_FIRM_DIR/vendor/lib64/vendor.samsung.hardware.tlc.iccc@1.0.so"
+    fi
+}
 
 DISABLE_SECURITY() {
     if [ "$#" -ne 1 ]; then
@@ -1290,6 +1307,7 @@ DISABLE_SECURITY() {
 
 	DISABLE_FBE "$EXTRACTED_FIRM_DIR"
 	DISABLE_FDE "$EXTRACTED_FIRM_DIR"
+	REMOVE_TLC_ICC "$EXTRACTED_FIRM_DIR"
 }
 
 
