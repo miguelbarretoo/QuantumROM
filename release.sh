@@ -10,7 +10,7 @@ TAG_NAME="${TARGET_DEVICE}-$(date +%s)"
 RELEASE_NAME="${TARGET_DEVICE} Port For ${STOCK_DEVICE}"
 
 echo "Uploading to GoFile..."
-GOFILE_LINK=$(sudo bash "$(pwd)/upload.sh" "$ZIP_PATH")
+GOFILE_LINK=$(sudo bash upload.sh "$ZIP_PATH")
 
 # File info
 FILE_SIZE=$(du -h "$ZIP_PATH" | cut -f1)
