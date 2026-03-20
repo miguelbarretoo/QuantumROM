@@ -65,44 +65,47 @@ jobs:
             "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" \
             "${{ github.event.inputs.OUTPUT_FILESYSTEM }}"
 
-      - name: Compress & Split files before upload.
+      - name: Compress and make files before upload.
         run: |
-          GIT_SUPPORT_SIZE=2147483647
-          OUT_DIR="OUT"
           echo "BUILD_TIME=$(TZ='Asia/Dhaka' date '+%Y-%m-%d %I:%M:%S %p UTC+6')" >> $GITHUB_ENV
+          OUT_DIR="$(pwd)/OUT"
+          ZIP_NAME="${{ github.event.inputs.TARGET_DEVICE }} port for ${{ github.event.inputs.STOCK_DEVICE }}.zip"
+          ZIP_PATH="$(pwd)/$ZIP_NAME"
+    
           if [ "${{ github.event.inputs.COMPRESS_IMG_TO_XZ }}" = "True" ]; then
             echo "Compressing all .img files to .xz (level 9)..."
-            for img in "$OUT_DIR"/*.img; do
+            for img in "$(pwd)/OUT"/*.img; do
               [ -f "$img" ] || continue
               echo "Compressing $img"
               sudo xz -9 -T0 "$img"
             done
           fi
+          
+          sudo rm -f "$OUT_DIR"/*.img
+          echo "Creating zip: $ZIP_NAME"
+          sudo 7z a -tzip "$ZIP_PATH" "$OUT_DIR"/*
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
 
-          for file in "$OUT_DIR"/*; do
-            [ -f "$file" ] || continue
-            FILE_SIZE=$(stat -c%s "$file")
-            if [ "$FILE_SIZE" -gt "$GIT_SUPPORT_SIZE" ]; then
-              echo "Splitting: $file (Size: $FILE_SIZE bytes)"
-              sudo split -b "$GIT_SUPPORT_SIZE" -d -a 3 "$file" "$file.part"
-              sudo rm -f "$file"
-            fi
-          done
-
-      - name: Upload files to GitHub Release.
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: "build-${{ github.run_id }}"
-          name: "${{ github.event.inputs.TARGET_DEVICE }} On ${{ github.event.inputs.STOCK_DEVICE }} QuantumROM Build: ${{ github.run_id }}"
-          body: |
-            ***Build Information***
-            - ➡️ Build For: ${{ github.event.inputs.STOCK_DEVICE }}
-            - ➡️ Build From: ${{ github.event.inputs.TARGET_DEVICE }}
-            - ⏰️ Build Time: ${{ env.BUILD_TIME }}
-          files: |
-            OUT/*
+      - name: Create GitHub Release with download link
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
+          GIT_TOKEN: ${{ secrets.GIT_TOKEN }}
+        run: |
+          TAG_NAME="${{ github.event.inputs.TARGET_DEVICE }}-$(date +%s)"
+          RELEASE_NAME="${{ github.event.inputs.TARGET_DEVICE }} port for ${{ github.event.inputs.STOCK_DEVICE }}"
+          GOFILE_LINK=$(sudo bash "$(pwd)/upload.sh" "$ZIP_PATH")
+          echo "Download Link: $GOFILE_LINK"
 
+          # Create release with link in body
+          curl -X POST https://api.github.com/repos/${{ github.repository }}/releases \
+            -H "Authorization: token $GIT_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"tag_name\": \"$TAG_NAME\",
+              \"name\": \"$RELEASE_NAME\",
+              \"body\": \"📦 ROM Download:\\n$GOFILE_LINK\",
+              \"draft\": false,
+              \"prerelease\": false
+            }"
+      
       - name: Clean everything.
         run: sudo rm -rf *
