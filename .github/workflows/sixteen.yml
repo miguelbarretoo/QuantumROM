@@ -70,11 +70,11 @@ jobs:
           echo "BUILD_TIME=$(TZ='Asia/Dhaka' date '+%Y-%m-%d %I:%M:%S %p UTC+6')" >> $GITHUB_ENV
           OUT_DIR="$(pwd)/OUT"
           ZIP_NAME="${{ github.event.inputs.TARGET_DEVICE }}_Port_For_${{ github.event.inputs.STOCK_DEVICE }}.zip"
-          ZIP_PATH="$(pwd)/$OUT_DIR/$ZIP_NAME"
+          ZIP_PATH="$OUT_DIR/$ZIP_NAME"
     
           if [ "${{ github.event.inputs.COMPRESS_IMG_TO_XZ }}" = "True" ]; then
             echo "Compressing all .img files to .xz (level 9)..."
-            for img in "$(pwd)/$OUT_DIR"/*.img; do
+            for img in "$OUT_DIR"/*.img; do
               [ -f "$img" ] || continue
               echo "Compressing $img"
               sudo xz -9 -T0 "$img"
