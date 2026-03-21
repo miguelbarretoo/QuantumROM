@@ -5,7 +5,7 @@ This Custom ROM is built by combining and refining features from multiple projec
 - The goal of this ROM is to provide a clean, optimized, and stable One UI experience with enhanced usability and performance.
 
 ### 🛠️ Tools features.
-Download firmware directly from samsung server.
+- Download firmware directly from samsung server.
 - File config and file contexts generate.
 - Extract and img build ( erofs and ext4 supported).
 
@@ -88,9 +88,9 @@ My tool can build images in two formats:
 
 #### 7. Compress IMG to XZ (True / False).
 If set to True:
-The generated image will be compressed to .xz format.
+- The generated image will be compressed to .xz format.
 - This reduces file size before uploading.
-- If set to False:
+If set to False:
 - The image will remain in its original format without compression.
    
 #### 8. Add Git Credentials:
