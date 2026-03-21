@@ -88,10 +88,10 @@ My tool can build images in two formats:
 
 #### 7. Compress IMG to XZ (True / False).
 If set to True:
-- The generated image will be compressed to .xz format.
-- This reduces file size before uploading.
+ - The generated image will be compressed to .xz format.
+ - This reduces file size before uploading.
 If set to False:
-- The image will remain in its original format without compression.
+ - The image will remain in its original format without compression.
    
 #### 8. Add Git Credentials:
 In your forked repository, go to:
