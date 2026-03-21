@@ -28,7 +28,7 @@ Download firmware directly from samsung server.
 - [BluetoothLibraryPatcher](https://github.com/3arthur6/BluetoothLibraryPatcher) integrated
 
 ### 🔐 Security & Privacy.
-Secure Folder support.
+- Secure Folder support.
 - Essential security components retained.
 - Stable and safe daily-driver experience.
 
