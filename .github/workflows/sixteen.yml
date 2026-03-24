@@ -1,4 +1,4 @@
-name: QuantumROM Tools.
+name: QuantumROM Tools Sixteen.
 
 on:
   workflow_dispatch:
@@ -34,7 +34,7 @@ on:
 
 jobs:
   build:
-    name: Start QuantumROM Tools.
+    name: Start QuantumROM Tools Sixteen.
     runs-on: ubuntu-latest
 
     steps:
