@@ -1402,7 +1402,6 @@ APPLY_CUSTOM_FEATURES() {
 	local EXTRACTED_FIRM_DIR="$1"
 
     echo -e "${YELLOW}Applying usefull features.${NC}"
-	FIX_SELINUX "$EXTRACTED_FIRM_DIR"
 	DISABLE_SECURITY "$EXTRACTED_FIRM_DIR"
 	
 	echo -e "- Adding build prop tweak."
