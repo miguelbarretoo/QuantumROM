@@ -88,41 +88,49 @@ GET_PROP() {
 
 
 DOWNLOAD_FIRMWARE() {
-    if [ "$#" -ne 4 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <MODEL> <CSC> <IMEI> <DOWNLOAD_DIRECTORY>"
+    if [ "$#" -lt 4 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <MODEL> <CSC> <IMEI> <DOWNLOAD_DIRECTORY> [VERSION]"
         return 1
     fi
 
-    local MODEL=$1
-    local CSC=$2
-    local IMEI=$3
+    local MODEL="$1"
+    local CSC="$2"
+    local IMEI="$3"
     local DOWN_DIR="${4}/$MODEL"
+    local VERSION="${5:-}"
 
-	rm -rf "$DOWN_DIR"
+    rm -rf "$DOWN_DIR"
     mkdir -p "$DOWN_DIR"
 
     echo -e "======================================"
     echo -e "${YELLOW}  Samsung FW Downloader   ${NC}"
     echo -e "======================================"
     echo -e "MODEL: $MODEL | CSC: $CSC"
-    echo -e "- Fetching latest firmware..."
-    echo
 
-    # --- Step 1: Check Update ---
-    version=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
-    if [ $? -ne 0 ] || [ -z "$version" ]; then
-        echo -e "- ⛔️ MODEL/CSC/IMEI not valid or no update found."
-        echo -e "- Error: $version"
-        return 1
+    # --- Step 1: Determine Version ---
+    if [ -n "$VERSION" ]; then
+        echo -e "- ✅ Downloading provided version: $VERSION"
     else
-        echo -e "- ✅ Update found: $version"
+        echo -e "- Fetching latest firmware..."
+
+        VERSION=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
+
+        if [ $? -ne 0 ] || [ -z "$VERSION" ]; then
+            echo -e "- ⛔️ MODEL/CSC/IMEI not valid or no update found."
+            echo -e "- Error: $VERSION"
+            return 1
+        fi
+
+        echo -e "- ✅ Latest version found: $VERSION"
     fi
 
+    echo
+
     # --- Step 2: Download Firmware ---
-    python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" download -v "$version" -O "$DOWN_DIR"
+    python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" download -v "$VERSION" -O "$DOWN_DIR"
     if [ $? -ne 0 ]; then
         echo -e "- ⛔️ Download failed. Check IMEI/MODEL/CSC."
-        return 1
+        exit 1
     fi
 
     # --- Step 3: Decrypt Firmware ---
@@ -130,11 +138,11 @@ DOWNLOAD_FIRMWARE() {
 
     if [ -z "$enc_file" ]; then
         echo -e "- ⛔️ No encrypted firmware file found!"
-        return 1
+        exit 1
     fi
 
     python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" decrypt \
-        -v "$version" \
+        -v "$VERSION" \
         -i "$enc_file" \
         -o "${DOWN_DIR}/${MODEL}.zip" >/dev/null 2>&1
 
@@ -145,8 +153,9 @@ DOWNLOAD_FIRMWARE() {
 
     # --- Show Firmware Info ---
     file_size=$(du -m "${DOWN_DIR}/${MODEL}.zip" | cut -f1)
+
     echo
-    echo -e "- ✅ Firmware decrypted successfully!. Firmware Size: ${file_size} MB"
+    echo -e "- ✅ Firmware decrypted successfully! Firmware Size: ${file_size} MB"
     echo -e "- Saved to: ${DOWN_DIR}/${MODEL}.zip"
 
     # --- Cleanup ---
@@ -253,7 +262,7 @@ PREPARE_PARTITIONS() {
     done
 
     echo -e "${YELLOW}Preparing partitinos.${NC} $STOCK_DEVICE"
-	
+
     find "$EXTRACTED_FIRM_DIR" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
 
     shopt -s nullglob dotglob
@@ -462,7 +471,12 @@ REPLACE_SMALI_METHOD() {
     method_esc=$(printf '%s\n' "$METHOD_NAME" | sed -e 's/[.[\*^$/]/\\&/g')
 
     echo -e "- Patching: $FILE"
+	echo -e "  Method: $METHOD_NAME"
 
+    if ! grep -q "$METHOD_NAME" "$FILE"; then
+        echo -e "- ${YELLOW}Method not found → Skipped${NC}"
+        return 0
+    fi
     sed -i "
 /^[[:space:]]*$method_esc\$/,/^[[:space:]]*\.end method/{
     /^[[:space:]]*$method_esc\$/{
@@ -527,7 +541,7 @@ PATCH_FLAG_SECURE() {
 	# local METHOD_NAME_1=".method public isSecureLocked()Z"
 	# Only one method.
 
-	local FILE="${1}/smali_classes2/com/android/server/wm/WindowState.smali"
+	local FILE_1="${1}/smali_classes2/com/android/server/wm/WindowState.smali"
     local METHOD_NAME_1=".method public final isSecureLocked()Z"
     local REPLACE_BODY_1='
     .locals 1
@@ -536,8 +550,9 @@ PATCH_FLAG_SECURE() {
 
     return v0
     '
-    REPLACE_SMALI_METHOD "$FILE" "$METHOD_NAME_1" "$REPLACE_BODY_1"
-    
+    REPLACE_SMALI_METHOD "$FILE_1" "$METHOD_NAME_1" "$REPLACE_BODY_1"
+  
+	local FILE_2="${1}/smali_classes2/com/android/server/wm/WindowManagerService.smali"
     local METHOD_NAME_2=".method public final notifyScreenshotListeners(I)Ljava/util/List;"
     local REPLACE_BODY_2='
     .locals 3
@@ -576,8 +591,8 @@ PATCH_FLAG_SECURE() {
     invoke-direct {p0, p1}, Ljava/lang/SecurityException;-><init>(Ljava/lang/String;)V
 
     throw p0
-'    
-    REPLACE_SMALI_METHOD "$FILE" "$METHOD_NAME_2" "$REPLACE_BODY_2"
+    '
+    REPLACE_SMALI_METHOD "$FILE_2" "$METHOD_NAME_2" "$REPLACE_BODY_2"
 }
 
 
@@ -723,21 +738,40 @@ UPDATE_SDHMS() {
 
 PATCH_SSRM() {
     echo -e ""
-	if [ "$#" -ne 1 ]; then
+
+    if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_SSRM_DIRECTORY>"
         return 1
     fi
 
     local SSRM_DIR="$1"
-	local FILE="$SSRM_DIR/smali/com/android/server/ssrm/Feature.smali"
+    local FILE="$SSRM_DIR/smali/com/android/server/ssrm/Feature.smali"
 
-	echo -e "${YELLOW}Patching ssrm.jar${NC}"
-	echo -e "- Patching: $FILE"
+    echo -e "${YELLOW}Patching ssrm${NC}"
+    echo -e "- Patching: $FILE"
 
-    sed -i "s/\(const-string v[0-9]\+,\s*\"\)siop_[^\"]*\"/\1$STOCK_SIOP_FILENAME\"/g" "$FILE"
-    sed -i "/dvfs_policy_default/! s/\(const-string v[0-9]\+,\s*\"\)dvfs_policy_[^\"]*\"/\1$STOCK_DVFS_FILENAME\"/g" "$FILE"
+    if [ ! -f "$FILE" ]; then
+        echo -e "- ${RED}File not found! Skipping...${NC}"
+        return 1
+    fi
 
-    # UPDATE_SDHMS "$FIRM_DIR/$TARGET_DEVICE"
+    if grep -Eq 'const-string v[0-9]+, "siop_' "$FILE"; then
+        echo -e "- Found siop_ → Replacing"
+        sed -i 's/\(const-string v[0-9]\+,\s*"\)siop_[^"]*"/\1'"$STOCK_SIOP_FILENAME"'"/g' "$FILE"
+    else
+        echo -e "- siop filename not found → Skipped"
+    fi
+
+    if grep -Eq 'const-string v[0-9]+, "dvfs_policy_[^"]*_[^"]*"' "$FILE"; then
+        echo -e "- Found dvfs_policy_*_* → Replacing"
+
+        sed -i '/dvfs_policy_default/! {
+            s/\(const-string v[0-9]\+,\s*"\)dvfs_policy_[^"]*_[^"]*"/\1'"$STOCK_DVFS_FILENAME"'"/g
+        }' "$FILE"
+
+    else
+        echo -e "- dvfs_policy file name not found → Skipped"
+    fi
 }
 
 
