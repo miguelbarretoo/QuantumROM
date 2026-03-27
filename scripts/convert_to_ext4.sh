@@ -32,10 +32,8 @@ mkdir -p "$DEST_DIR/${IMG_NAME_BASE}_mount"
 
 # 🔥 Mount depending on FS
 if echo "$FS_TYPE" | grep -qi "f2fs"; then
-    echo "[*] F2FS detected → using fuse2fs"
     fuse2fs "$IMG_PATH" "$DEST_DIR/${IMG_NAME_BASE}_mount"
 else
-    echo "[*] Using loop mount"
     mount -o loop,ro "$IMG_PATH" "$DEST_DIR/${IMG_NAME_BASE}_mount"
 fi
 
@@ -63,10 +61,5 @@ rm -rf "$DEST_DIR/${IMG_NAME_BASE}_mount"
 
 # 🔥 Rename back to original name
 FINAL_IMG="$DEST_DIR/${IMG_NAME_BASE}.img"
-
-echo "[*] Replacing original image..."
 rm -f "$FINAL_IMG"
 mv "$NEW_IMG_NAME" "$FINAL_IMG"
-
-echo ""
-echo "Final image: $FINAL_IMG"
