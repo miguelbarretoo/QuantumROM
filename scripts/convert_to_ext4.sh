@@ -17,10 +17,6 @@ if [ ! -f "$IMG_PATH" ]; then
     exit 1
 fi
 
-# Detect filesystem
-fstype=$(blkid -o value -s TYPE "$IMG_PATH")
-[ -z "$fstype" ] && fstype=$(file -b "$IMG_PATH")
-
 # Clean previous mounts
 umount "$DEST_DIR/$IMG_NAME_BASE" 2>/dev/null
 rm -rf "$DEST_DIR/$IMG_NAME_BASE"
@@ -30,12 +26,8 @@ rm -rf "$DEST_DIR/${IMG_NAME_BASE}_mount"
 # Create mount point
 mkdir -p "$DEST_DIR/${IMG_NAME_BASE}_mount"
 
-# 🔥 Mount depending on FS
-if echo "$FS_TYPE" | grep -qi "f2fs"; then
-    fuse2fs "$IMG_PATH" "$DEST_DIR/${IMG_NAME_BASE}_mount"
-else
-    mount -o loop,ro "$IMG_PATH" "$DEST_DIR/${IMG_NAME_BASE}_mount"
-fi
+# 🔥 Mount
+fuse2fs "$IMG_PATH" "$DEST_DIR/${IMG_NAME_BASE}_mount"
 
 # Calculate size
 MOUNT_SIZE=$(du -sb "$DEST_DIR/${IMG_NAME_BASE}_mount" | awk '{print int($1 * 1.3)}')
