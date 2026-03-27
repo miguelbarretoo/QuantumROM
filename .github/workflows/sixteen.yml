@@ -55,7 +55,7 @@ jobs:
           source scripts/QuantumRom.sh
           sudo DOWNLOAD_FIRMWARE "${{ github.event.inputs.TARGET_DEVICE }}" "${{ github.event.inputs.TARGET_DEVICE_CSC }}" "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" "FIRMWARE"
 
-      - name: Extracting ▶️ "${{ github.event.inputs.TARGET_DEVICE }}" firmware.
+      - name: Extracting ▶️ ${{ github.event.inputs.TARGET_DEVICE }} firmware.
         run: |
           source scripts/QuantumRom.sh
           sudo EXTRACT_FIRMWARE "FIRMWARE/${{ github.event.inputs.TARGET_DEVICE }}"
@@ -71,7 +71,7 @@ jobs:
             "${{ github.event.inputs.TARGET_DEVICE_IMEI }}" \
             "${{ github.event.inputs.OUTPUT_FILESYSTEM }}"
 
-      - name: Compress *.img & make zip file before upload.
+      - name: Compress all .img & make zip file before upload.
         run: |
           echo "BUILD_TIME=$(TZ='Asia/Dhaka' date '+%Y-%m-%d %I:%M:%S %p UTC+6')" >> $GITHUB_ENV
           OUT_DIR="$(pwd)/OUT"
