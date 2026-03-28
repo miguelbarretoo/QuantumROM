@@ -429,8 +429,8 @@ INSTALL_FRAMEWORK() {
 
 DECOMPILE() {
     echo -e ""
-    if [ "$#" -ne 3 ]; then
-        echo -e "Usage: DECOMPILE <APKTOOL_JAR_DIR> <FILE> <DECOMPILE_DIR>"
+    if [ "$#" -ne 4 ]; then
+        echo -e "Usage: DECOMPILE <APKTOOL_JAR_DIR> <FRAMEWORK_DIR> <FILE> <DECOMPILE_DIR>"
         return 1
     fi
 
@@ -443,14 +443,15 @@ DECOMPILE() {
 	# --frame-path = framework path
 	# -o = decompile directory
 	local APKTOOL="$1"
-    local FILE="$2"
-    local DECOMPILE_DIR="$3"
+	local FRAMEWORK_DIR="$2"
+    local FILE="$3"
+    local DECOMPILE_DIR="$4"
     local BASENAME="$(basename "${FILE%.*}")"
     local OUT="$DECOMPILE_DIR/$BASENAME"
 
     echo -e "${YELLOW}Decompiling:${NC} $FILE"
 	rm -rf "$OUT"
-    java -jar "$APKTOOL" d --force --match-original "$FILE" -o "$OUT"
+    java -jar "$APKTOOL" d --force --frame-path "$FRAMEWORK_DIR" --match-original "$FILE" -o "$OUT"
 }
 
 
@@ -461,9 +462,14 @@ RECOMPILE() {
         return 1
     fi
 
+    # apktool version-3
+	# b = recompile
+	# --copy-original = use original manifest
+	# --frame-path = framework path
+	# -o = output /recompile file directory with filename
 	local APKTOOL="$1"
-	local DECOMPILED_DIR="$2"
-    local FRAMEWORK_DIR="$3"
+	local FRAMEWORK_DIR="$2"
+	local DECOMPILED_DIR="$3"
     local RECOMPILE_DIR="$4"
 
     local org_file_name
@@ -474,7 +480,7 @@ RECOMPILE() {
     local final_file="$WORK_DIR/$org_file_name"
 
     echo -e "${YELLOW}Recompiling:${NC} $DECOMPILED_DIR"
-    java -jar "$APKTOOL" b "$DECOMPILED_DIR" --copy-original -p "$FRAMEWORK_DIR" -o "$built_file"
+    java -jar "$APKTOOL" b "$DECOMPILED_DIR" --copy-original --frame-path "$FRAMEWORK_DIR" -o "$built_file"
 
     # Zipalign
 	echo -e ""
