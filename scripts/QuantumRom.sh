@@ -369,7 +369,6 @@ DISABLE_FBE() {
     fi
 
     if [ ! -d "$EXTRACTED_FIRM_DIR/vendor/etc" ]; then
-        echo -e "- $EXTRACTED_FIRM_DIR/vendor/etc directory not found. Skipping FBE disable."
         return 1
     fi
 
@@ -395,7 +394,6 @@ DISABLE_FDE() {
     fi
 
     if [ ! -d "$EXTRACTED_FIRM_DIR/vendor/etc" ]; then
-        echo -e "- $EXTRACTED_FIRM_DIR/vendor/etc directory not found. Skipping FDE disable."
         return 1
     fi
 
