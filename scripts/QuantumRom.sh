@@ -193,6 +193,10 @@ EXTRACT_FIRMWARE() {
         fi
     done
 
+	rm -rf "$FIRM_DIR"/BL_*.tar.md5
+	rm -f "$FIRM_DIR"/CP_*.tar.md5
+	rm -f "$FIRM_DIR"/CSC_*.tar.md5
+
     # ---- XZ ----
     for file in "$FIRM_DIR"/*.xz; do
         if [ -f "$file" ]; then
@@ -979,7 +983,7 @@ ADD_SYSTEM_EXT_IN_SYSTEM_ROOT() {
 }
 
 
-SEPERATE_SYSTEM_EXT() {
+SEPARATE_SYSTEM_EXT() {
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
@@ -1048,7 +1052,7 @@ ADJUST_SYSTEM_EXT() {
 	fi
 
     if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "TRUE" ] && [ -d "$EXTRACTED_FIRM_DIR/system/system/system_ext/apex" ]; then
-	    SEPERATE_SYSTEM_EXT "$EXTRACTED_FIRM_DIR"
+	    SEPARATE_SYSTEM_EXT "$EXTRACTED_FIRM_DIR"
 	fi
 
 	if [ "$STOCK_HAS_SEPARATE_SYSTEM_EXT" = "FALSE" ] && [[ -d "$EXTRACTED_FIRM_DIR/system_ext/apex" ]]; then
