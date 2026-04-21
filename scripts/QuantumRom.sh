@@ -845,7 +845,6 @@ PATCH_BT_LIB() {
 	debugfs -R "dump /lib64/libbluetooth_jni.so $WORK_DIR/libbluetooth_jni.so" "$WORK_DIR/apex_payload.img" >/dev/null 2>&1
 	rm -rf "$WORK_DIR/apex_payload.img"
 
-    # local associative array (function-scoped)
     declare -A hex=(
         [136]=00122a0140395f01086b00020054 [1136]=00122a0140395f01086bde030014
         [135]=480500352800805228 [1135]=530100142800805228
@@ -878,9 +877,6 @@ PATCH_BT_LIB() {
         [629]=90387810b1002400254a [1629]=90387800200024002558
     )
 
-    local HEXDATA
-    HEXDATA="$(xxd -p -c 0 "$BT_LIB_FILE")" || return 1
-
     local PATCHED=0
 
     for idx in "${!hex[@]}"; do
@@ -892,20 +888,29 @@ PATCH_BT_LIB() {
         [ -z "$to" ] && continue
 
         # convert wildcard .... → regex
-        local from_regex="${from//./[0-9a-f]}"
+        local from_regex
+        from_regex="$(echo "$from" | sed -E 's/\.\./[0-9a-f]{2}/g')"
+        if perl -e '
+            $/ = undef;
+            open(F, shift) or exit 1;
+            $_ = <F>;
+            my $hex = unpack("H*", $_);
+            exit ($hex =~ /'"$from_regex"'/i ? 0 : 1);
+        ' "$BT_LIB_FILE"; then
 
-        if echo -e "$HEXDATA" | grep -qiE "$from_regex"; then
             echo -e "- Found Bluetooth patch pattern [$idx]"
+
             HEX_PATCH "$BT_LIB_FILE" "$from" "$to" || return 1
+
             PATCHED=1
-			mv -f "$WORK_DIR/libbluetooth_jni.so" "$EXTRACTED_FIRM_DIR/system/system/lib64/"
+            mv -f "$BT_LIB_FILE" "$EXTRACTED_FIRM_DIR/system/system/lib64/"
             break
         fi
     done
 
     if [ "$PATCHED" -eq 0 ]; then
         echo -e "- No known Bluetooth patch pattern matched."
-		rm -rf "$BT_LIB_FILE"
+        rm -rf "$BT_LIB_FILE"
         return 1
     fi
 
