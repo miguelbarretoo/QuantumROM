@@ -916,13 +916,13 @@ PATCH_BT_LIB() {
 FIX_VNDK() {
     echo -e "- Checking $STOCK_DEVICE and $TARGET_DEVICE vndk version."
     export SDK="$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" ro.build.version.sdk_full)"
-	echo "- Target rom SDK version: $SDK"
+	echo "  - Target rom SDK version: $SDK"
     if [ -f "$TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk.v${STOCK_VNDK_VERSION}.apex" ]; then
-        echo -e "- VNDK matched. $TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk.v${STOCK_VNDK_VERSION}.apex"
+        echo -e "  - VNDK matched. $TARGET_ROM_SYSTEM_EXT_DIR/apex/com.android.vndk.v${STOCK_VNDK_VERSION}.apex"
     else
-        echo -e "- VNDK mismatch. Adding SDK $SDK com.android.vndk.v${STOCK_VNDK_VERSION}.apex"
+        echo -e "  - VNDK mismatch. Adding SDK $SDK com.android.vndk.v${STOCK_VNDK_VERSION}.apex"
         rm -rf "$TARGET_ROM_SYSTEM_EXT_DIR/apex/"*.apex
-        cp -rfa "$VNDKS_COLLECTION/$SDK/$STOCK_VNDK_VERSION/system_ext/"* "$TARGET_ROM_SYSTEM_EXT_DIR/"
+        unzip -o "$VNDKS_COLLECTION/$SDK/${STOCK_VNDK_VERSION}.zip" -d "$TARGET_ROM_SYSTEM_EXT_DIR/" >/dev/null 2>&1
     fi
 }
 
@@ -939,7 +939,7 @@ ADD_SYSTEM_EXT_IN_SYSTEM_ROOT() {
     rm -rf "$EXTRACTED_FIRM_DIR/system/system_ext"
     mv "$EXTRACTED_FIRM_DIR/system_ext" "$EXTRACTED_FIRM_DIR/system"
 
-    echo -e "- Cleaning and merging system_ext file contexts and configs"
+    echo -e "  - Cleaning and merging system_ext file contexts and configs"
     # File paths
     SYSTEM_EXT_CONFIG_FILE="$EXTRACTED_FIRM_DIR/config/system_ext_fs_config"
     SYSTEM_EXT_CONTEXTS_FILE="$EXTRACTED_FIRM_DIR/config/system_ext_file_contexts"
@@ -1076,9 +1076,10 @@ FIX_SELINUX() {
         return 1
     fi
 
-    echo -e "- Fixing selinux"
+    echo -e "- Patching selinux"
 
 	local EXTRACTED_FIRM_DIR="$1"
+	UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag")
 
 	if [ -d "$EXTRACTED_FIRM_DIR/system_ext/apex" ]; then
         export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system_ext"
@@ -1088,39 +1089,15 @@ FIX_SELINUX() {
             export TARGET_ROM_SYSTEM_EXT_DIR="$EXTRACTED_FIRM_DIR/system/system/system_ext"
     fi
 
-    if [ -n "$STOCK_VNDK_VERSION" ]; then
-        SELINUX_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${STOCK_VNDK_VERSION}.0.cil"
-    else
-        MANIFEST_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/vintf/manifest.xml"
+    find "$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/" -type f -name "*.0.cil" | while read -r SELINUX_FILE; do
+        # echo "  - Processing: $SELINUX_FILE"
 
-        if [ ! -f "$MANIFEST_FILE" ]; then
-            echo -e "- manifest.xml not found. Cannot determine VNDK version."
-            return 1
-        fi
-
-        TARGET_ROM_VNDK_VERSION=$(grep -oP '(?<=<version>)[0-9]+' "$MANIFEST_FILE" | head -n1)
-
-        if [ -z "$TARGET_ROM_VNDK_VERSION" ]; then
-            echo -e "- Failed to extract VNDK version from manifest."
-            return 1
-        fi
-
-        SELINUX_FILE="$TARGET_ROM_SYSTEM_EXT_DIR/etc/selinux/mapping/${TARGET_ROM_VNDK_VERSION}.0.cil"
-    fi
-
-    echo -e "- Using SELinux mapping file: $SELINUX_FILE"
-
-    if [ ! -f "$SELINUX_FILE" ]; then
-        echo -e "- Error: SELinux file not found at $SELINUX_FILE"
-        exit 1
-    fi
-
-    UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag")
-
-    for keyword in "${UNSUPPORTED_SELINUX[@]}"; do
-        if grep -q "$keyword" "$SELINUX_FILE"; then
-            sed -i "/$keyword/d" "$SELINUX_FILE"
-        fi
+        for keyword in "${UNSUPPORTED_SELINUX[@]}"; do
+            if grep -qF "$keyword" "$SELINUX_FILE"; then
+                # echo "    - Removing keyword: $keyword"
+                sed -i "/$keyword/d" "$SELINUX_FILE"
+            fi
+        done
     done
 
     REMOVE_LINE '(genfscon sysfs "/bus/usb/devices" (u object_r sysfs_usb ((s0) (s0))))' "$EXTRACTED_FIRM_DIR/system/system/etc/selinux/plat_sepolicy.cil" >/dev/null 2>&1
@@ -1135,7 +1112,7 @@ UPDATE_FLOATING_FEATURE() {
     local key="$1"
     local value="$2"
     if [[ -z "$value" ]]; then
-        echo -e "- Skipping $key — no value found."
+        echo -e "  - Skipping $key — no value found."
         return
     fi
 
