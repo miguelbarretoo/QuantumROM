@@ -124,7 +124,7 @@ DOWNLOAD_FIRMWARE() {
     else
         echo -e "- Fetching latest firmware..."
 
-        VERSION=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
+        export VERSION=$(python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" checkupdate 2>&1)
 
         if [ $? -ne 0 ] || [ -z "$VERSION" ]; then
             echo -e "- ⛔️ MODEL/CSC/IMEI not valid or no update found."
@@ -196,6 +196,7 @@ EXTRACT_FIRMWARE() {
 	rm -rf "$FIRM_DIR"/BL_*.tar.md5
 	rm -f "$FIRM_DIR"/CP_*.tar.md5
 	rm -f "$FIRM_DIR"/CSC_*.tar.md5
+    rm -f "$FIRM_DIR"/HOME_CSC_*.tar.md5
 
     # ---- XZ ----
     for file in "$FIRM_DIR"/*.xz; do

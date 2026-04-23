@@ -29,6 +29,7 @@ $GOFILE_LINK
 #### 📱 Rom Info:
 • Ported For: $STOCK_DEVICE
 • Ported From: $TARGET_DEVICE
+• Build Version: $VERSION
 
 #### ⚙️ Build Options:
 • Filesystem: $OUTPUT_FILESYSTEM
