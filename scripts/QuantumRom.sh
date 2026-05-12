@@ -1214,8 +1214,8 @@ UPDATE_FLOATING_FEATURE() {
 APPLY_CUSTOM_FLOATING_FEATURE() {
     echo " "
 
-    if [ "$#" -ne 3 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <FLOATING_FEATURE_FILE_DIRECTORY> <FLOATING_FEATURE_LINE> <VALUE>"
+    if [ "$#" -ne 1 ]; then
+        echo -e "Usage: ${FUNCNAME[0]} <FLOATING_FEATURE_FILE_DIRECTORY>"
         return 1
     fi
 
