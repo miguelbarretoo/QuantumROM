@@ -2084,7 +2084,6 @@ BUILD_IMG() {
                 -t "$MOUNT_POINT" \
                 -P \
                 -c \
-                -L 2 \
                 -a lz4 \
                 "$OUT_IMG"
 
