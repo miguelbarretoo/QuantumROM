@@ -2070,14 +2070,14 @@ BUILD_IMG() {
 
             dd if=/dev/zero of=$OUT_IMG bs=512 count=$((EXTENDED_SIZE / 512))
 
-            make_f2fs \
+            $make_f2fs \
                 -f -q \
                 -g android \
                 -O extra_attr,inode_checksum,sb_checksum,compression \
                 -l "$MOUNT_POINT" \
                 "$OUT_IMG"
 
-            sload_f2fs \
+            $sload_f2fs \
                 -f "$SOURCE_DIR" \
                 -C "$FS_CONFIG" \
                 -s "$FILE_CONTEXTS" \
