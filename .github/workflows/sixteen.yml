@@ -97,9 +97,8 @@ jobs:
 
       - name: Extract partition images
         run: |
-          source scripts/QuantumRom.sh
           ls -a "$FIRM_DIR/$TARGET_DEVICE"
-          sudo EXTRACT_FIRMWARE_IMG "$FIRM_DIR/$TARGET_DEVICE" "all"
+          sudo bash -c 'source scripts/QuantumRom.sh && EXTRACT_FIRMWARE_IMG "$FIRM_DIR/$TARGET_DEVICE" "all"
 
       - name: Decode OMC
         run: |
