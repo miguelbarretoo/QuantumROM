@@ -204,24 +204,6 @@ DOWNLOAD_FIRMWARE() {
         exit 1
     fi
 
-    # --- Step 3: Decrypt Firmware ---
-    enc_file=$(find "$DOWN_DIR" -name "*.enc*" | head -n 1)
-
-    if [ -z "$enc_file" ]; then
-        echo -e "- ⛔️ No encrypted firmware file found!"
-        exit 1
-    fi
-
-    python3 -m samloader -m "$MODEL" -r "$CSC" -i "$IMEI" decrypt \
-        -v "$VERSION" \
-        -i "$enc_file" \
-        -o "${DOWN_DIR}/${MODEL}.zip" >/dev/null 2>&1
-
-    if [ $? -ne 0 ]; then
-        echo -e "- ⛔️ Decryption failed."
-        exit 1
-    fi
-
     # --- Show Firmware Info ---
     local file_size=$(du -m "${DOWN_DIR}/${MODEL}.zip" | cut -f1)
 
