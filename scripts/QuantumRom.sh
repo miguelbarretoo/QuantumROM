@@ -2,10 +2,6 @@
 
 ###################################################################################################
 
-RED="\e[31m"
-YELLOW="\e[33m"
-NC="\e[0m"
-
 REAL_USER=${SUDO_USER:-$USER}
 
 # QT DIR
@@ -88,7 +84,7 @@ GET_PROP() {
     esac
 
     if [ ! -f "$FILE" ]; then
-        echo -e "- ${RED}File not found:${NC} $FILE"
+        echo -e "- ${RED}File not found: $FILE"
         return 1
     fi
 
@@ -172,7 +168,7 @@ DOWNLOAD_FIRMWARE() {
     mkdir -p "$DOWN_DIR"
 
     echo -e "======================================"
-    echo -e "${YELLOW}  Samsung FW Downloader   ${NC}"
+    echo -e "  Samsung FW Downloader   "
     echo -e "======================================"
     echo -e "MODEL: $MODEL | CSC: $CSC"
 
@@ -213,7 +209,7 @@ EXTRACT_FIRMWARE() {
 
     local FIRM_DIR="$1"
 
-    echo -e "${YELLOW}Extracting downloaded firmware.${NC}"
+    echo -e "Extracting downloaded firmware."
 
     # ---- ZIP ----
     for file in "$FIRM_DIR"/*.zip; do
@@ -329,7 +325,7 @@ EXTRACT_SUPER_IMG() {
     local FIRM_DIR="$1"
 
     if [ -f "$FIRM_DIR/super.img" ]; then
-        echo -e "${YELLOW}Extracting super.img${NC}"
+        echo -e "Extracting super.img"
         if [ "$(DETECT_FILESYSTEM "$FIRM_DIR/super.img")" = "sparse" ]; then
 		    echo -e "Converting to raw super.img"
             simg2img "$FIRM_DIR/super.img" "$FIRM_DIR/super_raw.img"
@@ -343,7 +339,7 @@ EXTRACT_SUPER_IMG() {
         echo -e "super.img extraction complete"
 
     else
-        echo -e "${RED}No super.img found.${NC}"
+        echo -e "${RED}No super.img found."
     fi
 }
 
@@ -356,10 +352,10 @@ PREPARE_PARTITIONS() {
 
     local EXTRACTED_FIRM_DIR="$1"
 
-    echo -e "${YELLOW}Preparing partitinos.${NC} $STOCK_DEVICE"
+    echo -e "Preparing partitinos. $STOCK_DEVICE"
 	
 	if [ ! -d "$EXTRACTED_FIRM_DIR" ]; then
-        echo -e "${RED} Directory not found:${NC} $EXTRACTED_FIRM_DIR"
+        echo -e "${RED} Directory not found: $EXTRACTED_FIRM_DIR"
         return 1
     fi
 
@@ -424,7 +420,7 @@ EXTRACT_FIRMWARE_IMG() {
         return 1
     fi
 
-    echo -e "${YELLOW}Extracting images from:${NC} $EXTRACTED_FIRM_DIR"
+    echo -e "Extracting images from: $EXTRACTED_FIRM_DIR"
 
     extract_img() {
         local imgfile="$1"
@@ -445,17 +441,17 @@ EXTRACT_FIRMWARE_IMG() {
 
         local fstype=$(DETECT_FILESYSTEM "$imgfile")
         if [ "$fstype" = "sparse" ]; then
-            echo -e "${YELLOW}$partition.img is SPARSE. Converting to raw img.${NC}"
+            echo -e "$partition.img is SPARSE. Converting to raw img."
 
             local tmp_raw="${imgfile}.raw"
 
             if ! simg2img "$imgfile" "$tmp_raw" >/dev/null 2>&1; then
-                echo -e "${RED}Failed to convert sparse image:${NC} $img_name"
+                echo -e "${RED}Failed to convert sparse image: $img_name"
                 return
             fi
 
             if [ ! -f "$tmp_raw" ]; then
-                echo -e "${RED}- Sparse conversion output missing:${NC} $tmp_raw"
+                echo -e "${RED}- Sparse conversion output missing: $tmp_raw"
                 return
             fi
 
@@ -468,24 +464,24 @@ EXTRACT_FIRMWARE_IMG() {
         case "$fstype" in
             ext4)
                 echo " "
-                echo -e "${YELLOW}$partition.img Detected ext4.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
+                echo -e "$partition.img Detected ext4. Size: $ORG_IMG_SIZE bytes. Extracting..."
                 python3 "$imgextractor_py" "$imgfile" "$EXTRACTED_FIRM_DIR"
                 ;;
 
             erofs)
                 echo " "
-                echo -e "${YELLOW}$partition.img Detected erofs.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
+                echo -e "$partition.img Detected erofs. Size: $ORG_IMG_SIZE bytes. Extracting..."
                 "$extract_erofs" -i "$imgfile" -x -f -o "$EXTRACTED_FIRM_DIR" >/dev/null 2>&1
                 ;;
 
             f2fs)
                 echo " "
-                echo -e "${YELLOW}$partition.img Detected f2fs.${NC} Size: $ORG_IMG_SIZE bytes. Extracting..."
+                echo -e "$partition.img Detected f2fs. Size: $ORG_IMG_SIZE bytes. Extracting..."
                 bash "$QT_DIR/scripts/extract_img.sh" "$imgfile" "$EXTRACTED_FIRM_DIR"
                 ;;
 
             *)
-                echo -e "${RED}- $img_name unsupported filesystem type:${NC} ($fstype), skipping"
+                echo -e "${RED}- $img_name unsupported filesystem type: ($fstype), skipping"
                 ;;
         esac
     }
@@ -509,7 +505,7 @@ EXTRACT_FIRMWARE_IMG() {
         local TARGET_IMG="$EXTRACTED_FIRM_DIR/$MODE"
 
         if [ ! -f "$TARGET_IMG" ]; then
-            echo -e "${RED}- Image not found:${NC} $TARGET_IMG"
+            echo -e "${RED}- Image not found: $TARGET_IMG"
             return 1
         fi
 
@@ -583,11 +579,11 @@ INSTALL_FRAMEWORK() {
     local framework_apk="$2"
 
 	if [ ! -f "$framework_apk" ]; then
-        echo -e "- ${RED}File not found:${NC} $framework_apk"
+        echo -e "- ${RED}File not found: $framework_apk"
         return 1
     fi
 
-    echo -e "${YELLOW}Installing:${NC} $framework_apk"
+    echo -e "Installing: $framework_apk"
     java -jar "$APKTOOL" install-framework "$framework_apk"
 }
 
@@ -615,10 +611,10 @@ DECOMPILE() {
     local BASENAME="$(basename "${FILE%.*}")"
     local OUT="$DECOMPILE_DIR/$BASENAME"
 
-    echo -e "${YELLOW}Decompiling:${NC} $FILE"
+    echo -e "Decompiling: $FILE"
 
 	if [ ! -f "$FILE" ]; then
-        echo -e "-${RED} File not found:${NC} $FILE"
+        echo -e "-${RED} File not found: $FILE"
         return 1
     fi
 
@@ -650,10 +646,10 @@ RECOMPILE() {
     local ext="${org_file_name##*.}"
     local built_file="$RECOMPILE_DIR/${name}.$ext"
 
-    echo -e "${YELLOW}Recompiling:${NC} $DECOMPILED_DIR"
+    echo -e "Recompiling: $DECOMPILED_DIR"
 
 	if [ ! -d "$DECOMPILED_DIR" ]; then
-        echo -e "-${RED} Directory not found:${NC} $DECOMPILED_DIR"
+        echo -e "-${RED} Directory not found: $DECOMPILED_DIR"
         return 1
     fi
 
@@ -663,7 +659,7 @@ RECOMPILE() {
 	# Zipalign
 	# echo " "
 	# if [[ "$ext" == "apk" ]]; then
-	    # echo -e "${YELLOW}Zipaligning:${NC} $built_file to $final_file"
+	    # echo -e "Zipaligning: $built_file to $final_file"
         # zipalign -v 4 "$built_file" "$final_file" >/dev/null 2>&1
 		# rm -rf "$built_file"
     # fi
@@ -679,7 +675,7 @@ REPLACE_SMALI_METHOD() {
     echo -e "- Method: $METHOD_NAME"
 
     if ! grep -Fq "$METHOD_NAME" "$FILE"; then
-        echo -e "- ${YELLOW}Method not found → Skipped${NC}"
+        echo -e "- Method not found → Skipped"
         return 0
     fi
 
@@ -745,7 +741,7 @@ PATCH_FLAG_SECURE() {
         return 1
     fi
 
-	echo -e "${YELLOW}Patching flag secure.${NC}"
+	echo -e "Patching flag secure."
     #
 	# For android 13
 	# local FILE="${1}/smali_classes3/com/android/server/wm/WindowState.smali"
@@ -817,7 +813,7 @@ PATCH_SECURE_FOLDER() {
         return 1
     fi
 
-    echo -e "${YELLOW}Patching secure folder.${NC}"
+    echo -e "Patching secure folder."
 
 	#https://forum.xda-developers.com/t/mods-samsung-not-android-mods-collection-exynos.3772017/post-86770885
 	local FILE_1="${1}/smali/com/android/server/knox/dar/DarManagerService.smali"
@@ -858,7 +854,7 @@ PATCH_PRIVATE_SHARE() {
         return 1
     fi
 
-    echo -e "${YELLOW}Patching private share.${NC}"
+    echo -e "Patching private share."
 	# https://forum.xda-developers.com/t/mods-samsung-not-android-mods-collection-exynos.3772017/post-86805769
 	
     local FILE="${1}/smali/com/samsung/android/security/keystore/AttestParameterSpec.smali"
@@ -883,7 +879,7 @@ DISABLE_SIGNATURE_VERIFICATION() {
         return 1
     fi
 
-    echo -e "${YELLOW}Disabling signature verification.${NC}"
+    echo -e "Disabling signature verification."
 	# https://github.com/ShaDisNX255/NcX_Stock/commit/e9fca1cedf2405c9f84dc2ee4aafa018e59de464
     # https://forum.xda-developers.com/t/mods-samsung-not-android-mods-collection-exynos.3772017/post-87773529
     # https://forum.xda-developers.com/t/mods-samsung-not-android-mods-collection-exynos.3772017/post-87773543
@@ -910,7 +906,7 @@ PATCH_KNOX_GUARD() {
         return 1
     fi
 
-    echo -e "${YELLOW}Patching knox guard.${NC}"
+    echo -e "Patching knox guard."
     local FILE="${1}/smali_classes2/com/samsung/android/knoxguard/service/KnoxGuardSeService.smali"
     # patch .method public constructor <init>(Landroid/content/Context;)V
     local METHOD_NAME_1=".method public constructor <init>(Landroid/content/Context;)V"
@@ -972,11 +968,11 @@ PATCH_SSRM() {
     local SSRM_DIR="$1"
     local FILE="$SSRM_DIR/smali/com/android/server/ssrm/Feature.smali"
 
-    echo -e "${YELLOW}Patching SSRM.${NC}"
+    echo -e "Patching SSRM."
     echo -e "- Patching: $FILE"
 
     if [ ! -f "$FILE" ]; then
-        echo -e "- ${RED}File not found! Skipping...${NC}"
+        echo -e "- ${RED}File not found! Skipping..."
         return 1
     fi
 
@@ -1012,10 +1008,10 @@ PATCH_BT_LIB() {
 	local WORK_DIR="$2"
 	local BT_LIB_FILE="$WORK_DIR/libbluetooth_jni.so"
 
-    echo -e "${YELLOW}Patching Bluetooth library.${NC}"
+    echo -e "Patching Bluetooth library."
     # Get libbluetooth_jni.so
     if ! ls "$EXTRACTED_FIRM_DIR"/system/system/apex/com.android.bt*.apex >/dev/null 2>&1; then
-        echo -e "- ${RED} No bluetooth apex file found.${NC}"
+        echo -e "- ${RED} No bluetooth apex file found."
         return 1
     fi
 
@@ -1275,7 +1271,7 @@ PATCH_SELINUX() {
 
 	local EXTRACTED_FIRM_DIR="$1"
 
-    echo -e "${YELLOW}Patching selinux.${NC}"
+    echo -e "Patching selinux."
 
 	UNSUPPORTED_SELINUX=("audiomirroring" "fabriccrypto" "hal_dsms_default" "qb_id_prop" "hal_dsms_service" "proc_compaction_proactiveness" "sbauth" "ker_app" "kpp_app" "kpp_data" "attiqi_app" "kpoc_charger" "sec_diag")
 
@@ -1298,7 +1294,7 @@ PATCH_SELINUX() {
     fi
 
     if [ ! -d "$TARGET_ROM_SYSTEM_EXT_DIR" ]; then
-        echo -e "${RED} - No system_ext_dir found. ${NC}"
+        echo -e "${RED} - No system_ext_dir found. "
         return 1
     fi
 
@@ -1367,7 +1363,7 @@ APPLY_CUSTOM_FLOATING_FEATURE() {
 
 	local FLOATING_FEATURE_FILE_DIRECTORY="$1"
 
-	echo -e "${YELLOW}Applying Custom Floating Feature.${NC}"
+	echo -e "Applying Custom Floating Feature."
     #========== COMMON ==========#
     UPDATE_FLOATING_FEATURE "$FLOATING_FEATURE_FILE_DIRECTORY" "SEC_FLOATING_FEATURE_COMMON_CONFIG_SEP_CATEGORY" "sep_basic"
 
@@ -1589,7 +1585,7 @@ APPLY_STOCK_ROM_FLOATING_FEATURE() {
 APPLY_STOCK_CONFIG() {
     echo " "
 
-	echo -e "${YELLOW}Applying $STOCK_DEVICE device config.${NC}"
+	echo -e "Applying $STOCK_DEVICE device config."
     if [ "$#" -ne 1 ]; then
         echo -e "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
         return 1
@@ -1703,7 +1699,7 @@ BUILD_PROP() {
     esac
 
     if [ ! -f "$FILE" ]; then
-        echo -e "- ${RED}File not found:${NC} $FILE"
+        echo -e "- ${RED}File not found: $FILE"
         return 1
     fi
 
@@ -1755,7 +1751,7 @@ DISABLE_SECURITY() {
 
 	local EXTRACTED_FIRM_DIR="$1"
 
-    echo -e "${YELLOW}Disabling security related things.${NC}"
+    echo -e "Disabling security related things."
 
     if [ -f "$EXTRACTED_FIRM_DIR/product/etc/build.prop" ]; then
         echo "- Disabling factory reset protection from product."
@@ -1798,7 +1794,7 @@ ADD_FLAGSHIP_APPS() {
         return 1
     fi
 
-	echo -e "${YELLOW}Adding samsung full ONEUI apps.${NC}"
+	echo -e "Adding samsung full ONEUI apps."
 
 	local EXTRACTED_FIRM_DIR="$1"
 	local FLOATING_FEATURE_FILE_DIRECTORY="$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
@@ -1863,7 +1859,7 @@ APPLY_CUSTOM_FEATURES() {
         return 1
     fi
 
-    echo -e "${YELLOW}Applying usefull features.${NC}"
+    echo -e "Applying usefull features."
 
 	echo -e "- Adding build prop tweak."
 	BUILD_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.product.locale" "en-US"
@@ -1976,7 +1972,7 @@ GEN_FS_CONFIG() {
 
     touch "$FS_CONFIG"
 
-    echo -e "${YELLOW}Generating fs_config for partition:${NC} $PARTITION"
+    echo -e "Generating fs_config for partition: $PARTITION"
 
     awk '{print $1}' "$FS_CONFIG" | sort -u > "$TMP_EXISTING"
 
@@ -2052,7 +2048,7 @@ GEN_FILE_CONTEXTS() {
 
     touch "$FILE_CONTEXTS"
 
-    echo -e "${YELLOW}Generating file_contexts for partition:${NC} $PARTITION"
+    echo -e "Generating file_contexts for partition: $PARTITION"
 
     declare -A EXISTING=()
 
@@ -2154,7 +2150,7 @@ BUILD_IMG() {
 
         if [[ "$FILE_SYSTEM" == "erofs" ]]; then
             echo " "
-            echo -e "${YELLOW}Building erofs image:${NC} $OUT_IMG"
+            echo -e "Building erofs image: $OUT_IMG"
 
             $mkfs_erofs \
                 --mount-point="$MOUNT_POINT" \
@@ -2167,7 +2163,7 @@ BUILD_IMG() {
 
         elif [[ "$FILE_SYSTEM" == "ext4" ]]; then
             echo " "
-            echo -e "${YELLOW}Building ext4 image:${NC} $OUT_IMG"
+            echo -e "Building ext4 image: $OUT_IMG"
 
             SIZE=$(((EXTRACTED_SIZE + 4095) / 4096 * 4096))
             EXTENDED_SIZE=$((SIZE + SIZE / 5))
@@ -2190,7 +2186,7 @@ BUILD_IMG() {
 
         elif [[ "$FILE_SYSTEM" == "f2fs" ]]; then
             echo " "
-            echo -e "${YELLOW}Building f2fs image:${NC} $OUT_IMG"
+            echo -e "Building f2fs image: $OUT_IMG"
 
             SIZE=$(((EXTRACTED_SIZE + 511) / 512 * 512))
             EXTENDED_SIZE=$((SIZE + SIZE / 4))
@@ -2221,7 +2217,7 @@ BUILD_IMG() {
             mv "${OUT_IMG}.sparse" "$OUT_IMG"
 
         else
-            echo -e "${RED}Unsupported filesystem:${NC} $FILE_SYSTEM"
+            echo -e "${RED}Unsupported filesystem: $FILE_SYSTEM"
             return
         fi
     }
@@ -2254,7 +2250,7 @@ BUILD_SUPER_IMG() {
     OUTPUT_DIR="$2"
     OUTPUT_IMG="$OUTPUT_DIR/super.img"
     
-    echo -e "${YELLOW}Building:${NC} super.img"
+    echo -e "Building: super.img"
 
     if [ ! -d "$IMG_DIR" ]; then
         echo "- Input folder not found: $IMG_DIR"
@@ -2282,7 +2278,7 @@ BUILD_SUPER_IMG() {
         part_name="${name%.img}"
         size=$(stat -c%s "$img")
 
-        echo -e "${YELLOW}Adding:${NC} $part_name ($size bytes)"
+        echo -e "Adding: $part_name ($size bytes)"
 
         PARTITIONS="$PARTITIONS --partition ${part_name}:readonly:${size}:main"
         IMAGES="$IMAGES --image ${part_name}=$img"
@@ -2305,9 +2301,9 @@ BUILD_SUPER_IMG() {
         --output "$OUTPUT_IMG"
 
     if [ $? -eq 0 ]; then
-        echo -e "${YELLOW}Build completed:${NC} $OUTPUT_IMG"
+        echo -e "Build completed: $OUTPUT_IMG"
     else
-        echo -e "${RED}Failed to build super.img${NC}"
+        echo -e "${RED}Failed to build super.img"
         return 1
     fi
 }

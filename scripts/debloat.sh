@@ -1,11 +1,5 @@
 #!/bin/bash
 
-###################################################################################################
-
-RED="\e[31m"
-YELLOW="\e[33m"
-NC="\e[0m"
-
 
 # GENERAL / SYSTEM / BLOAT
 DEBLOAT_APPS=(
@@ -180,7 +174,7 @@ KICK() {
             target="$dir/$app"
 
             if [[ -d "$target" ]]; then
-                rm -rf "$target" || echo -e "${RED}[WARN] Failed to delete $target${NC}"
+                rm -rf "$target" || echo -e "[WARN] Failed to delete $target"
             fi
         done
     done
@@ -201,7 +195,7 @@ DEBLOAT() {
         return 1
     fi
 
-    echo -e "${YELLOW}Debloating apps and files.${NC}"
+    echo -e "Debloating apps and files."
 
 	# Debloat apps
 	echo "- Debloating apps."
