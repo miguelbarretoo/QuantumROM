@@ -936,7 +936,7 @@ UPDATE_SDHMS() {
     local EXTRACTED_FIRM_DIR="$1"
 
 	if [ "$USE_ALT_SDHMS_APP" = "TRUE" ]; then
-        echo "- Adding alternative SDHMS app"
+        echo "- Adding alternative SDHMS app."
 		rm -rf "${EXTRACTED_FIRM_DIR}/system/priv-app/SamsungDeviceHealthManagerService"
 		cp -a "$(pwd)/QuantumROM/Mods/Apps/SDHMS/." "${EXTRACTED_FIRM_DIR}/system"
     fi
@@ -1306,35 +1306,48 @@ PATCH_SELINUX() {
 
 UPDATE_FLOATING_FEATURE() {
     if [ "$#" -ne 3 ]; then
-        echo -e "Usage: ${FUNCNAME[0]} <FLOATING_FEATURE_FILE_DIRECTORY> <FLOATING_FEATURE_LINE> <VALUE>"
+        echo "Usage: ${FUNCNAME[0]} <FLOATING_FEATURE_FILE_DIRECTORY> <FLOATING_FEATURE_LINE> <VALUE>"
         return 1
     fi
 
-	local FLOATING_FEATURE_FILE_DIRECTORY="$1"
+    local FLOATING_FEATURE_FILE_DIRECTORY="$1"
     local key="$2"
     local value="$3"
 
-    if [[ -z "$value" ]]; then
-        echo -e "- Skipping $key — no value found."
+    value=$(printf '%s' "$value" | tr -d '\r' | xargs)
+
+    [ -z "$value" ] && {
+        echo "- Skipping $key — no value found."
         return
-    fi
+    }
 
-    if grep -q "<${key}>.*</${key}>" "$FLOATING_FEATURE_FILE_DIRECTORY"; then
-        local current_line=$(grep "<${key}>.*</${key}>" "$FLOATING_FEATURE_FILE_DIRECTORY")
-        local current_value=$(echo -e "$current_line" | sed -E "s/.*<${key}>(.*)<\/${key}>.*/\1/")
+    local escaped_value
+    escaped_value=$(printf '%s' "$value" | sed 's/[\/&]/\\&/g')
 
-        if [[ "$current_value" == "$value" ]]; then
+    if grep -Fq "<${key}>" "$FLOATING_FEATURE_FILE_DIRECTORY"; then
+
+        local current_value
+        current_value=$(
+            sed -n "s|.*<${key}>\\(.*\\)</${key}>.*|\\1|p" \
+            "$FLOATING_FEATURE_FILE_DIRECTORY" | head -n1 | xargs
+        )
+
+        if [ "$current_value" = "$value" ]; then
             return
         fi
 
-        local indent=$(echo -e "$current_line" | sed -E "s/(<${key}>.*<\/${key}>).*//")
-        local line="${indent}<${key}>${value}</${key}>"
-        sed -i "s|${indent}<${key}>.*</${key}>|$line|" "$FLOATING_FEATURE_FILE_DIRECTORY"
-        # echo -e "- Updated $key with ▶️ $value"
+        sed -i \
+            "/<${key}>.*<\/${key}>/c\\    <${key}>${escaped_value}</${key}>" \
+            "$FLOATING_FEATURE_FILE_DIRECTORY"
+
+        #echo "- Updated $key with: $value"
+
     else
-        local line="    <$key>$value</$key>"
-        sed -i "3i\\$line" "$FLOATING_FEATURE_FILE_DIRECTORY"
-        # echo -e "- Added $key with value ▶️ $value"
+        sed -i \
+            "3i\\    <${key}>${escaped_value}</${key}>" \
+            "$FLOATING_FEATURE_FILE_DIRECTORY"
+
+        #echo "- Added $key with value: $value"
     fi
 }
 
@@ -1568,6 +1581,56 @@ APPLY_STOCK_ROM_FLOATING_FEATURE() {
 }
 
 
+REMOVE_CAMERA_FILES() {
+    if [ "$#" -ne 1 ]; then
+        echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
+        return 1
+    fi
+
+    local EXTRACTED_FIRM_DIR="$1"
+    local LIB_DIRS=(
+        "$EXTRACTED_FIRM_DIR/system/system/lib"
+        "$EXTRACTED_FIRM_DIR/system/system/lib64"
+    )
+
+    local ARCSOFT_LIBS_LIST="$EXTRACTED_FIRM_DIR/system/system/etc/public.libraries-arcsoft.txt"
+    local CAMERA_LIBS_LIST="$EXTRACTED_FIRM_DIR/system/system/etc/public.libraries-camera.samsung.txt"
+
+    echo "- Removing camera files."
+
+    local arcsoft_files=()
+    local camera_files=()
+
+    [ -f "$ARCSOFT_LIBS_LIST" ] && mapfile -t arcsoft_files < "$ARCSOFT_LIBS_LIST"
+    [ -f "$CAMERA_LIBS_LIST" ] && mapfile -t camera_files < "$CAMERA_LIBS_LIST"
+
+    local LIB_FILES=("${arcsoft_files[@]}" "${camera_files[@]}")
+
+    for folder in "${LIB_DIRS[@]}"; do
+        for file_name in "${LIB_FILES[@]}"; do
+            local target="$folder/$file_name"
+
+            if [ -f "$target" ]; then
+			     #echo "Deleting: $target"
+                rm -f "$target"
+            fi
+        done
+    done
+
+    rm -f "$ARCSOFT_LIBS_LIST"
+    rm -f "$CAMERA_LIBS_LIST"
+
+    rm -rf "$EXTRACTED_FIRM_DIR/system/system/priv-app/SamsungCamera"
+    rm -rf "$EXTRACTED_FIRM_DIR/system/system/cameradata"
+
+    export FIRST_CAM_LINE="$(
+        grep -n '^    <SEC_FLOATING_FEATURE_CAMERA' \
+        "$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml" |
+        head -n 1 | cut -d: -f1
+    )"
+}
+
+
 FIX_CAMERA() {
     if [ "$#" -ne 1 ]; then
         echo "Usage: ${FUNCNAME[0]} <EXTRACTED_FIRM_DIR>"
@@ -1579,7 +1642,7 @@ FIX_CAMERA() {
     local ANDROID_VERSION=$(GET_PROP "$EXTRACTED_FIRM_DIR" "system" "ro.system.build.version.release")
 
     if [ "$USE_MTK_CAMERA_FILES" = "TRUE" ] && [ "$BUILD_BRAND" != "MTK" ]; then
-        echo "- Adding mediatek camera related files"
+        echo "- Adding mediatek camera related files."
 
         if [ ! -s "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}.zip" ]; then
             if ping -c 1 8.8.8.8 >/dev/null 2>&1; then
@@ -1594,15 +1657,21 @@ FIX_CAMERA() {
 
         if [ -s "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}.zip" ]; then
             rm -rf "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}"
+			REMOVE_CAMERA_FILES "$EXTRACTED_FIRM_DIR"
 
             unzip -o \
                 "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}.zip" \
                 -d "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}" \
                 >/dev/null 2>&1
 
-            cp -rfa \
-                "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}/system/." \
-                "$EXTRACTED_FIRM_DIR/system"
+            sed -i \
+                "$((FIRST_CAM_LINE-1))r $(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}/system/etc/floating_feature.xml" \
+                "$EXTRACTED_FIRM_DIR/system/system/etc/floating_feature.xml"
+
+			rm -rf "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}/system/etc/floating_feature.xml"
+
+            echo "- Copying A34 mediatek camera related files."
+            cp -rfa "$(pwd)/QuantumROM/Mods/Apps/MTK_Camera_Files_Android_${ANDROID_VERSION}/system/." "$EXTRACTED_FIRM_DIR/system/system"
         fi
     fi
 }
