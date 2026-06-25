@@ -1303,7 +1303,7 @@ PATCH_SELINUX() {
     fi
 
     if [ -d "$TARGET_ROM_SYSTEM_EXT_DIR" ]; then
-        echo -e "- Patching selinux for system_ext."
+        echo -e "- Patching selinux for system_ext"
 
         find "${TARGET_ROM_SYSTEM_EXT_DIR}/etc/selinux/mapping/" -type f -name "*.0.cil" | while read -r SELINUX_FILE; do
             # echo "  - Processing: $SELINUX_FILE"
