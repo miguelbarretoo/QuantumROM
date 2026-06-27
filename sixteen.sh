@@ -22,7 +22,6 @@ export WORK_DIR="$(pwd)/WORK"
 export APKTOOL="$(pwd)/bin/java/apktool.jar"
 export DEVICES_DIR="$(pwd)/QuantumROM/Devices"
 export VNDKS_COLLECTION="$(pwd)/QuantumROM/vndks"
-
 export BUILD_PARTITIONS="product,system_ext,system"
 
 # Source
